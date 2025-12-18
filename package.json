@@ -5,6 +5,7 @@
   "type": "module",
   "homepage": "https://insertnamehere0002.github.io/test_myReactProject/",
   "scripts": {
+    "generate-sites": "node scripts/generate-public-manifest.cjs",
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",

@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Website } from './types';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import WebsiteCard from './components/WebsiteCard';
@@ -51,6 +51,31 @@ const App: React.FC = () => {
   const closeInAppWindow = () => {
     setInAppWindowUrl(null);
   };
+
+  // Load generated public sites manifest and merge into websites list
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/sites.json')
+      .then(res => {
+        if (!res.ok) throw new Error('sites.json not found');
+        return res.json();
+      })
+      .then((sites: Website[]) => {
+        if (cancelled) return;
+        // append sites that don't already exist by id or url
+        setWebsites(prev => {
+          const existingIds = new Set(prev.map(w => w.id));
+          const existingUrls = new Set(prev.map(w => w.url));
+          const toAdd = sites.filter(s => !existingIds.has(s.id) && !existingUrls.has(s.url));
+          if (toAdd.length === 0) return prev;
+          return [...prev, ...toAdd];
+        });
+      })
+      .catch(() => {
+        // ignore if no manifest
+      });
+    return () => { cancelled = true; };
+  }, [setWebsites]);
 
   const handleAddWebsite = (name: string, url: string, category: string) => {
     const newWebsite: Website = {

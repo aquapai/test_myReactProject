@@ -1,0 +1,23 @@
+[
+  {
+    "id": "1984-bullet-hell",
+    "name": "1984 bullet hell",
+    "url": "/1984-bullet-hell/",
+    "imageUrl": "/placeholder-site.png",
+    "category": "내 사이트"
+  },
+  {
+    "id": "ai-맞춤형-문장-추천기",
+    "name": "ai 맞춤형 문장 추천기",
+    "url": "/ai-맞춤형-문장-추천기/",
+    "imageUrl": "/placeholder-site.png",
+    "category": "내 사이트"
+  },
+  {
+    "id": "time-stop",
+    "name": "time stop",
+    "url": "/time-stop/",
+    "imageUrl": "/placeholder-site.png",
+    "category": "내 사이트"
+  }
+]
