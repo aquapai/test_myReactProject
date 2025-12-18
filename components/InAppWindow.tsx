@@ -8,34 +8,49 @@ interface InAppWindowProps {
 const InAppWindow: React.FC<InAppWindowProps> = ({ url, onClose }) => {
   // If url is a root-relative path, prepend Vite base so iframe works when app is served under subpath
   const base = (import.meta.env && (import.meta.env.BASE_URL as string)) || '/';
-  let iframeSrc = url;
+  // Build candidate path (root-relative -> include index.html)
+  let iframeSrcCandidate = url;
   try {
-    if (iframeSrc.startsWith('/')) {
-      // Build path relative to Vite base. For folders ("/foo/"), point directly to index.html
-      const trimmed = iframeSrc.replace(/^\/+/, '').replace(/\/+$/, '');
-      const hasHtml = /\.html?$/.test(iframeSrc);
+    if (iframeSrcCandidate.startsWith('/')) {
+      const trimmed = iframeSrcCandidate.replace(/^\/+/, '').replace(/\/+$/, '');
+      const hasHtml = /\.html?$/.test(iframeSrcCandidate);
       const pathPart = hasHtml ? trimmed : `${trimmed}/index.html`;
-      iframeSrc = `${base.replace(/\/$/, '')}/${pathPart}`;
+      iframeSrcCandidate = `${base.replace(/\/$/, '')}/${pathPart}`;
     }
   } catch (e) {
     // fallback: use url as-is
   }
+
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
+  const [iframeSrc, setIframeSrc] = useState<string | null>(null);
 
+  // Directly use the built index.html path first. This avoids Blob-relative asset path issues.
   useEffect(() => {
     setLoaded(false);
     setError(null);
-  }, [iframeSrc, attempt]);
+    setIframeSrc(iframeSrcCandidate);
 
-  // fallback timeout: if not loaded within 8s show a helpful message
-  useEffect(() => {
     const t = setTimeout(() => {
-      if (!loaded) setError('로드가 지연되고 있습니다. 네트워크 또는 경로를 확인하세요.');
+      setError('로드가 지연되고 있습니다. 서버가 실행중인지 확인하거나 새 탭으로 열어보세요.');
     }, 8000);
+
     return () => clearTimeout(t);
-  }, [loaded]);
+  }, [iframeSrcCandidate, attempt]);
+
+  // helper: copy URL to clipboard
+  const copyUrl = async () => {
+    try {
+      const toCopy = iframeSrc ?? iframeSrcCandidate;
+      if (!toCopy) return;
+      await navigator.clipboard.writeText(toCopy);
+      // small feedback via console (UI feedback could be added)
+      console.log('[InAppWindow] URL copied to clipboard:', toCopy);
+    } catch (e) {
+      console.error('[InAppWindow] copy failed', e);
+    }
+  };
 
   return (
     <div className="inapp-overlay" onClick={onClose} role="dialog" aria-modal="true">
@@ -65,7 +80,7 @@ const InAppWindow: React.FC<InAppWindowProps> = ({ url, onClose }) => {
             </div>
             <div style={{ marginTop: '0.75rem' }}>
               <button
-                onClick={() => window.open(iframeSrc, '_blank', 'noopener')}
+                  onClick={() => window.open(iframeSrc ?? iframeSrcCandidate, '_blank', 'noopener')}
                 style={{ background: '#4f46e5', color: '#fff', border: 'none', padding: '0.5rem 0.75rem', borderRadius: 6 }}
               >
                 새 탭으로 열기
@@ -73,10 +88,20 @@ const InAppWindow: React.FC<InAppWindowProps> = ({ url, onClose }) => {
             </div>
           </div>
         )}
+        {error && (
+          <div style={{ padding: '0.75rem 1rem', color: '#cbd5e1', fontSize: '0.9rem' }}>
+            <div>시도한 URL:</div>
+            <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100%' }}>{iframeSrc ?? iframeSrcCandidate}</div>
+            <div style={{ marginTop: '0.5rem', display: 'flex', gap: '0.5rem' }}>
+              <button onClick={copyUrl} style={{ background: '#0f172a', color: '#fff', border: '1px solid #334155', padding: '0.35rem 0.6rem', borderRadius: 6 }}>URL 복사</button>
+              <button onClick={() => { console.log('[InAppWindow] Opening URL in new tab:', iframeSrc ?? iframeSrcCandidate); window.open(iframeSrc ?? iframeSrcCandidate, '_blank', 'noopener'); }} style={{ background: '#334155', color: '#fff', border: 'none', padding: '0.35rem 0.6rem', borderRadius: 6 }}>새 탭으로 열기</button>
+            </div>
+          </div>
+        )}
         {!error && !loaded && (
           <div style={{ padding: '1rem' }}>
             <button
-              onClick={() => window.open(iframeSrc, '_blank', 'noopener')}
+              onClick={() => window.open(iframeSrc ?? iframeSrcCandidate, '_blank', 'noopener')}
               style={{ background: '#334155', color: '#fff', border: 'none', padding: '0.4rem 0.65rem', borderRadius: 6 }}
             >
               새 탭으로 열기 (임시)
@@ -85,13 +110,13 @@ const InAppWindow: React.FC<InAppWindowProps> = ({ url, onClose }) => {
         )}
 
         <iframe
-          key={iframeSrc + '|' + attempt}
+          key={(iframeSrc ?? '') + '|' + attempt}
           className="inapp-iframe"
-          src={iframeSrc}
+          src={iframeSrc ?? undefined}
           title={url}
           sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
-          onLoad={() => { setLoaded(true); setError(null); }}
-          onError={() => setError('iframe 로드 실패 (onError).')}
+          onLoad={() => { setLoaded(true); setError(null); console.log('[InAppWindow] iframe loaded:', iframeSrc ?? iframeSrcCandidate); }}
+          onError={() => { console.error('[InAppWindow] iframe onError:', iframeSrc ?? iframeSrcCandidate); setError('iframe 로드 실패 (onError).'); }}
         />
       </div>
     </div>
