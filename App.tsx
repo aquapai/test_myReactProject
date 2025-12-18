@@ -64,18 +64,8 @@ const App: React.FC = () => {
       })
       .then((sites: Website[]) => {
         if (cancelled) return;
-        // If current stored list is empty, replace with detected sites.
-        // Otherwise append sites that don't already exist by id or url.
-        setWebsites(prev => {
-          if (!prev || prev.length === 0) {
-            return sites;
-          }
-          const existingIds = new Set(prev.map(w => w.id));
-          const existingUrls = new Set(prev.map(w => w.url));
-          const toAdd = sites.filter(s => !existingIds.has(s.id) && !existingUrls.has(s.url));
-          if (toAdd.length === 0) return prev;
-          return [...prev, ...toAdd];
-        });
+        // Always prefer the generated manifest from public/sites.json and replace stored websites.
+        setWebsites(() => sites);
       })
       .catch(err => {
         // Log manifest load errors to help debugging (network/path/base issues)
@@ -125,6 +115,14 @@ const App: React.FC = () => {
           >
             <PlusIcon className="add-button-icon" />
             Add New
+          </button>
+          <button
+            onClick={() => { localStorage.removeItem('my-websites'); location.reload(); }}
+            className="add-button"
+            style={{ marginLeft: '0.5rem', backgroundColor: '#334155' }}
+            title="Reset sites from public/sites.json"
+          >
+            Reset Sites
           </button>
         </header>
 
