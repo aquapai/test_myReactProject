@@ -63,6 +63,24 @@ const InAppWindow: React.FC<InAppWindowProps> = ({ url, onClose }) => {
             <div style={{ marginTop: '0.5rem' }}>
               확인 사항: 네트워크, `public/`에 `index.html` 존재 여부, 그리고 Dev 서버의 base 경로를 확인하세요.
             </div>
+            <div style={{ marginTop: '0.75rem' }}>
+              <button
+                onClick={() => window.open(iframeSrc, '_blank', 'noopener')}
+                style={{ background: '#4f46e5', color: '#fff', border: 'none', padding: '0.5rem 0.75rem', borderRadius: 6 }}
+              >
+                새 탭으로 열기
+              </button>
+            </div>
+          </div>
+        )}
+        {!error && !loaded && (
+          <div style={{ padding: '1rem' }}>
+            <button
+              onClick={() => window.open(iframeSrc, '_blank', 'noopener')}
+              style={{ background: '#334155', color: '#fff', border: 'none', padding: '0.4rem 0.65rem', borderRadius: 6 }}
+            >
+              새 탭으로 열기 (임시)
+            </button>
           </div>
         )}
 
