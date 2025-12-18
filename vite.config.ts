@@ -10,8 +10,9 @@ export default defineConfig(({ mode }) => {
       host: '0.0.0.0',
     },
     plugins: [react()],
-    // GitHub Pages 배포용 base
-    base: "/test_myReactProject/",
+    // Use root base in development so local static pages in `public/` are served at '/<site>/'
+    // and use GitHub Pages base for production builds.
+    base: mode === 'development' ? '/' : "/test_myReactProject/",
     define: {
       'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
       'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY)
