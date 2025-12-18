@@ -62,8 +62,12 @@ const App: React.FC = () => {
       })
       .then((sites: Website[]) => {
         if (cancelled) return;
-        // append sites that don't already exist by id or url
+        // If current stored list is empty, replace with detected sites.
+        // Otherwise append sites that don't already exist by id or url.
         setWebsites(prev => {
+          if (!prev || prev.length === 0) {
+            return sites;
+          }
           const existingIds = new Set(prev.map(w => w.id));
           const existingUrls = new Set(prev.map(w => w.url));
           const toAdd = sites.filter(s => !existingIds.has(s.id) && !existingUrls.has(s.url));
