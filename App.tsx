@@ -55,9 +55,11 @@ const App: React.FC = () => {
   // Load generated public sites manifest and merge into websites list
   useEffect(() => {
     let cancelled = false;
-    fetch('/sites.json')
+    // Use Vite base URL so manifest is found both in dev and when served under a subpath
+    const manifestPath = `${import.meta.env.BASE_URL || '/'}sites.json`.replace(/\/\/+/, '/');
+    fetch(manifestPath)
       .then(res => {
-        if (!res.ok) throw new Error('sites.json not found');
+        if (!res.ok) throw new Error('sites.json not found (' + res.status + ') at ' + manifestPath);
         return res.json();
       })
       .then((sites: Website[]) => {
@@ -75,8 +77,10 @@ const App: React.FC = () => {
           return [...prev, ...toAdd];
         });
       })
-      .catch(() => {
-        // ignore if no manifest
+      .catch(err => {
+        // Log manifest load errors to help debugging (network/path/base issues)
+        // eslint-disable-next-line no-console
+        console.warn('Could not load sites.json manifest:', err);
       });
     return () => { cancelled = true; };
   }, [setWebsites]);
