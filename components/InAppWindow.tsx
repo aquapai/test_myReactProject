@@ -11,8 +11,11 @@ const InAppWindow: React.FC<InAppWindowProps> = ({ url, onClose }) => {
   let iframeSrc = url;
   try {
     if (iframeSrc.startsWith('/')) {
-      // avoid double slashes
-      iframeSrc = `${base.replace(/\/$/, '')}/${iframeSrc.replace(/^\/+/, '')}`;
+      // Build path relative to Vite base. For folders ("/foo/"), point directly to index.html
+      const trimmed = iframeSrc.replace(/^\/+/, '').replace(/\/+$/, '');
+      const hasHtml = /\.html?$/.test(iframeSrc);
+      const pathPart = hasHtml ? trimmed : `${trimmed}/index.html`;
+      iframeSrc = `${base.replace(/\/$/, '')}/${pathPart}`;
     }
   } catch (e) {
     // fallback: use url as-is
