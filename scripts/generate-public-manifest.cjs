@@ -35,7 +35,7 @@ function buildSites() {
 
     // derive display name from folder name
     const displayName = name.replace(/[-_]/g, ' ');
-    const url = `/${name}/`;
+    const url = `/${name}/index.wrapped.html`;
 
     // choose image: prefer public/<name>/thumbnail.png or favicon.png, otherwise placeholder
     let imageUrl = `/placeholder-site.png`;
@@ -45,6 +45,20 @@ function buildSites() {
         imageUrl = `/${name}/${c}`;
         break;
       }
+    }
+
+    // Create a wrapped index that rewrites root-relative asset paths to folder-relative
+    try {
+      const indexPath = path.join(dirPath, 'index.html');
+      if (fs.existsSync(indexPath)) {
+        let html = fs.readFileSync(indexPath, 'utf8');
+        // Replace src="/... or href="/... (root-relative) with relative versions
+        html = html.replace(/(href|src)=("|')\//g, `$1=$2./`);
+        const wrappedPath = path.join(dirPath, 'index.wrapped.html');
+        fs.writeFileSync(wrappedPath, html, 'utf8');
+      }
+    } catch (e) {
+      // ignore wrap errors
     }
 
     sites.push({
