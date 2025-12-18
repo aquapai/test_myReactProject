@@ -1,8 +1,9 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Website } from './types';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import WebsiteCard from './components/WebsiteCard';
+import InAppWindow from './components/InAppWindow';
 import AddWebsiteModal from './components/AddWebsiteModal';
 import { PlusIcon } from './components/icons/PlusIcon';
 import './index.css';
@@ -31,26 +32,24 @@ const App: React.FC = () => {
       imageUrl: 'https://picsum.photos/seed/3/600/400',
       category: '게임',
     },
-     {
+    {
       id: '4',
       name: 'Behance',
       url: 'https://www.behance.net/',
       imageUrl: 'https://picsum.photos/seed/4/600/400',
       category: '미술',
     }
-    ,
-    
   ]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentCategory, setCurrentCategory] = useState('All');
+  const [inAppWindowUrl, setInAppWindowUrl] = useState<string | null>(null);
 
-  // (Removed) iframe postMessage listener and embedded navigation handling
+  const openInAppWindow = (url: string) => {
+    setInAppWindowUrl(url);
+  };
 
-  // (Removed) iframe DOM interception logic
-
-  const handleOpenEmbedded = (url: string) => {
-    // Open external URL in a new tab (sakuya site removed)
-    window.open(url, '_blank', 'noopener');
+  const closeInAppWindow = () => {
+    setInAppWindowUrl(null);
   };
 
   const handleAddWebsite = (name: string, url: string, category: string) => {
@@ -75,26 +74,6 @@ const App: React.FC = () => {
 
     return (
     <div className="app-container">
-      {/* Embedded URL Modal */}
-      {embeddedUrl && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setEmbeddedUrl(null)}>
-          <div className="bg-slate-900 rounded-lg w-full h-5/6 max-w-6xl relative shadow-2xl" onClick={(e) => e.stopPropagation()}>
-            <button
-              onClick={() => setEmbeddedUrl(null)}
-              className="absolute top-4 right-4 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg z-10 transition-colors duration-200"
-            >
-              Close
-            </button>
-            <iframe
-              ref={iframeRef}
-              onLoad={attachIframeInterceptor}
-              src={embeddedUrl}
-              title="Embedded Site"
-              className="w-full h-full rounded-lg border-none"
-            />
-          </div>
-        </div>
-      )}
       <AddWebsiteModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -141,7 +120,7 @@ const App: React.FC = () => {
                   key={website.id}
                   website={website}
                   onDelete={handleDeleteWebsite}
-                  onOpen={handleOpenEmbedded}
+                  onOpen={openInAppWindow}
                 />
               ))}
             </div>
@@ -158,6 +137,9 @@ const App: React.FC = () => {
           <p className="footer-address">주소: 쿠퍼티노 애플 링</p>
         </footer>
       </div>
+      {inAppWindowUrl && (
+        <InAppWindow url={inAppWindowUrl} onClose={closeInAppWindow} />
+      )}
     </div>
   );
 };
