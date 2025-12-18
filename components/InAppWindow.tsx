@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 interface InAppWindowProps {
   url: string;
@@ -20,19 +20,60 @@ const InAppWindow: React.FC<InAppWindowProps> = ({ url, onClose }) => {
   } catch (e) {
     // fallback: use url as-is
   }
+  const [loaded, setLoaded] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [attempt, setAttempt] = useState(0);
+
+  useEffect(() => {
+    setLoaded(false);
+    setError(null);
+  }, [iframeSrc, attempt]);
+
+  // fallback timeout: if not loaded within 8s show a helpful message
+  useEffect(() => {
+    const t = setTimeout(() => {
+      if (!loaded) setError('로드가 지연되고 있습니다. 네트워크 또는 경로를 확인하세요.');
+    }, 8000);
+    return () => clearTimeout(t);
+  }, [loaded]);
 
   return (
     <div className="inapp-overlay" onClick={onClose} role="dialog" aria-modal="true">
       <div className="inapp-window" onClick={e => e.stopPropagation()}>
         <div className="inapp-header">
-          <div className="inapp-title">{url}</div>
-          <button className="inapp-close" onClick={onClose} aria-label="Close">×</button>
+          <div className="inapp-title">{iframeSrc}</div>
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <button
+              className="inapp-close"
+              onClick={() => { setAttempt(a => a + 1); setLoaded(false); setError(null); }}
+              title="Reload iframe"
+              aria-label="Reload"
+              style={{ fontSize: '1rem', padding: '0.25rem 0.5rem', marginRight: '0.25rem' }}
+            >⟳</button>
+            <button className="inapp-close" onClick={onClose} aria-label="Close">×</button>
+          </div>
         </div>
+
+        {!loaded && !error && (
+          <div style={{ padding: '1rem', color: '#cbd5e1' }}>로딩 중…</div>
+        )}
+        {error && (
+          <div style={{ padding: '1rem', color: '#fecaca' }}>
+            오류: {error}
+            <div style={{ marginTop: '0.5rem' }}>
+              확인 사항: 네트워크, `public/`에 `index.html` 존재 여부, 그리고 Dev 서버의 base 경로를 확인하세요.
+            </div>
+          </div>
+        )}
+
         <iframe
+          key={iframeSrc + '|' + attempt}
           className="inapp-iframe"
           src={iframeSrc}
           title={url}
           sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+          onLoad={() => { setLoaded(true); setError(null); }}
+          onError={() => setError('iframe 로드 실패 (onError).')}
         />
       </div>
     </div>
