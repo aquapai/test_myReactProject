@@ -146,14 +146,25 @@ const App: React.FC = () => {
         <main>
           {filteredWebsites.length > 0 ? (
             <div className="website-grid">
-              {filteredWebsites.map(website => (
-                <WebsiteCard
-                  key={website.id}
-                  website={website}
-                  onDelete={handleDeleteWebsite}
-                  onOpen={openInAppWindow}
-                />
-              ))}
+              {(() => {
+                const visible = filteredWebsites.slice(0, 10);
+                const placeholdersNeeded = Math.max(0, 10 - visible.length);
+                const placeholders = Array.from({ length: placeholdersNeeded }).map((_, i) => ({
+                  id: `placeholder-${i}`,
+                  name: '',
+                  url: '',
+                  imageUrl: '',
+                  category: '',
+                } as any));
+                return [...visible, ...placeholders].map((website: any) => (
+                  <WebsiteCard
+                    key={website.id}
+                    website={website}
+                    onDelete={handleDeleteWebsite}
+                    onOpen={openInAppWindow}
+                  />
+                ));
+              })()}
             </div>
           ) : (
             <div className="no-websites-message">

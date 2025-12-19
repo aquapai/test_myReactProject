@@ -10,6 +10,8 @@ interface WebsiteCardProps {
 }
 
 const WebsiteCard: React.FC<WebsiteCardProps> = ({ website, onDelete, onOpen }) => {
+  const isPlaceholder = !website.name && !website.url;
+
   const isValidUrl = (url: string) => {
     try {
       new URL(url);
@@ -18,6 +20,20 @@ const WebsiteCard: React.FC<WebsiteCardProps> = ({ website, onDelete, onOpen }) 
       return false;
     }
   };
+
+  if (isPlaceholder) {
+    return (
+      <div className="group relative bg-slate-800/40 rounded-lg overflow-hidden shadow-sm transition-all duration-300 cursor-default">
+        <div className="relative">
+          <div className="w-full h-48 bg-slate-900/50" />
+        </div>
+        <div className="p-5">
+          <div className="h-6 bg-slate-900/60 rounded mb-2 w-3/4" />
+          <div className="h-4 bg-slate-900/50 rounded w-1/2" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
