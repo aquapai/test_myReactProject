@@ -25,6 +25,7 @@ const InAppWindow: React.FC<InAppWindowProps> = ({ url, onClose }) => {
   const [error, setError] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
   const [iframeSrc, setIframeSrc] = useState<string | null>(null);
+  const [autoOpened, setAutoOpened] = useState(false);
 
   // Directly use the built index.html path first. This avoids Blob-relative asset path issues.
   useEffect(() => {
@@ -107,7 +108,22 @@ const InAppWindow: React.FC<InAppWindowProps> = ({ url, onClose }) => {
     fetchAndRewrite();
 
     const t = setTimeout(() => {
-      if (!createdBlob) setError('로드가 지연되고 있습니다. 서버가 실행중인지 확인하거나 새 탭으로 열어보세요.');
+      if (!createdBlob) {
+        setError('로드가 지연되고 있습니다. 서버가 실행중인지 확인하거나 새 탭으로 열어보세요.');
+        // Try to auto-open the URL in a new tab as a fallback. May be blocked by popup blockers.
+        try {
+          if (!autoOpened) {
+            const target = iframeSrc ?? iframeSrcCandidate;
+            if (target) {
+              window.open(target, '_blank', 'noopener');
+              setAutoOpened(true);
+              console.log('[InAppWindow] auto-opened fallback URL in new tab:', target);
+            }
+          }
+        } catch (e) {
+          console.warn('[InAppWindow] auto-open failed', e);
+        }
+      }
     }, 8000);
 
     return () => {
