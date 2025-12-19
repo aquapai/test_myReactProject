@@ -45,10 +45,41 @@ const InAppWindow: React.FC<InAppWindowProps> = ({ url, onClose }) => {
         // Compute site base (strip trailing /index.html)
         const siteBase = iframeSrcCandidate.replace(/\/index\.html$/i, '').replace(/\/$/, '');
 
-        // Replace root-absolute references (src="/..." or href="/....") with siteBase + /...
-        const rewritten = html.replace(/(src|href)=\s*(["'])\/([^\"']+)/gi, (m, attr, q, path) => {
-          return `${attr}=${q}${siteBase}/${path}${q}`;
-        });
+        // Replace root-absolute references (src="/..." or href="/....") with either
+        // - siteBase + /... if that file exists under the site's __built__ folder
+        // - otherwise leave the original /... so global assets (like /index.css) still resolve
+        const attrRegex = /(src|href)=\s*(["'])\/([^\"']+)/gi;
+        const matches = Array.from(html.matchAll(attrRegex));
+        let rewritten = html;
+
+        // Helper to escape a string for RegExp
+        const escapeRegExp = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+        for (const m of matches) {
+          const attr = m[1];
+          const quote = m[2];
+          const path = m[3];
+          const original = `${attr}=${quote}/${path}`;
+          const siteCandidate = `${siteBase}/${path}`;
+          try {
+            // check whether the asset exists under siteCandidate
+            // using GET to avoid HEAD restrictions on some servers
+            // (we're in same-origin so this should be allowed)
+            // Note: we await here to ensure sequential checks and reduce load.
+            // eslint-disable-next-line no-await-in-loop
+            const probe = await fetch(siteCandidate, { method: 'GET', cache: 'no-store' });
+            if (probe.ok) {
+              // replace all occurrences of the original attribute with the siteCandidate
+              const re = new RegExp(escapeRegExp(original), 'g');
+              rewritten = rewritten.replace(re, `${attr}=${quote}${siteCandidate}`);
+            } else {
+              // leave as-is (keep root /path)
+            }
+          } catch (e) {
+            // If probe fails, be conservative and leave original path
+            console.warn('[InAppWindow] probe failed for', siteCandidate, e);
+          }
+        }
 
         // Create blob URL and use it as iframe src so relative references resolved against absolute URLs we rewrote above
         const blob = new Blob([rewritten], { type: 'text/html' });
