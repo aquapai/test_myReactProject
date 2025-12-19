@@ -28,15 +28,54 @@ const InAppWindow: React.FC<InAppWindowProps> = ({ url, onClose }) => {
 
   // Directly use the built index.html path first. This avoids Blob-relative asset path issues.
   useEffect(() => {
-    setLoaded(false);
-    setError(null);
-    setIframeSrc(iframeSrcCandidate);
+    let cancelled = false;
+    let createdBlob: string | null = null;
+
+    async function fetchAndRewrite() {
+      setLoaded(false);
+      setError(null);
+
+      try {
+        const res = await fetch(iframeSrcCandidate, { cache: 'no-store' });
+        if (!res.ok) throw new Error(`fetch ${iframeSrcCandidate} status ${res.status}`);
+        const html = await res.text();
+
+        if (cancelled) return;
+
+        // Compute site base (strip trailing /index.html)
+        const siteBase = iframeSrcCandidate.replace(/\/index\.html$/i, '').replace(/\/$/, '');
+
+        // Replace root-absolute references (src="/..." or href="/....") with siteBase + /...
+        const rewritten = html.replace(/(src|href)=\s*(["'])\/([^\"']+)/gi, (m, attr, q, path) => {
+          return `${attr}=${q}${siteBase}/${path}${q}`;
+        });
+
+        // Create blob URL and use it as iframe src so relative references resolved against absolute URLs we rewrote above
+        const blob = new Blob([rewritten], { type: 'text/html' });
+        createdBlob = URL.createObjectURL(blob);
+        setIframeSrc(createdBlob);
+        return;
+      } catch (err) {
+        console.warn('[InAppWindow] fetch/rewrite failed, falling back to direct src', err);
+        // fallback to direct src so browser loads assets from server paths
+        if (!cancelled) {
+          setIframeSrc(iframeSrcCandidate);
+          setError('빌드된 파일을 리라이트하지 못했습니다. 직접 경로로 로드합니다.');
+        }
+      }
+    }
+
+    fetchAndRewrite();
 
     const t = setTimeout(() => {
-      setError('로드가 지연되고 있습니다. 서버가 실행중인지 확인하거나 새 탭으로 열어보세요.');
+      if (!createdBlob) setError('로드가 지연되고 있습니다. 서버가 실행중인지 확인하거나 새 탭으로 열어보세요.');
     }, 8000);
 
-    return () => clearTimeout(t);
+    return () => {
+      cancelled = true;
+      clearTimeout(t);
+      if (createdBlob) URL.revokeObjectURL(createdBlob);
+    };
   }, [iframeSrcCandidate, attempt]);
 
   // helper: copy URL to clipboard
