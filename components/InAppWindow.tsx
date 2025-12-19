@@ -62,18 +62,26 @@ const InAppWindow: React.FC<InAppWindowProps> = ({ url, onClose }) => {
           const original = `${attr}=${quote}/${path}`;
           const siteCandidate = `${siteBase}/${path}`;
           try {
-            // check whether the asset exists under siteCandidate
-            // using GET to avoid HEAD restrictions on some servers
-            // (we're in same-origin so this should be allowed)
+            // check whether the asset exists under siteCandidate (same origin)
             // Note: we await here to ensure sequential checks and reduce load.
             // eslint-disable-next-line no-await-in-loop
-            const probe = await fetch(siteCandidate, { method: 'GET', cache: 'no-store' });
+            let probe = await fetch(siteCandidate, { method: 'GET', cache: 'no-store' });
             if (probe.ok) {
-              // replace all occurrences of the original attribute with the siteCandidate
               const re = new RegExp(escapeRegExp(original), 'g');
               rewritten = rewritten.replace(re, `${attr}=${quote}${siteCandidate}`);
             } else {
-              // leave as-is (keep root /path)
+              // try the common local static server at :8000 (used for diagnostics/build serving)
+              const alt = `http://localhost:8000${siteCandidate}`;
+              try {
+                // eslint-disable-next-line no-await-in-loop
+                const probe2 = await fetch(alt, { method: 'GET', cache: 'no-store' });
+                if (probe2.ok) {
+                  const re = new RegExp(escapeRegExp(original), 'g');
+                  rewritten = rewritten.replace(re, `${attr}=${quote}${alt}`);
+                }
+              } catch (e2) {
+                console.warn('[InAppWindow] alt probe failed for', alt, e2);
+              }
             }
           } catch (e) {
             // If probe fails, be conservative and leave original path
