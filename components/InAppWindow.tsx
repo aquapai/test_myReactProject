@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 interface InAppWindowProps {
   url: string;
@@ -26,11 +26,16 @@ const InAppWindow: React.FC<InAppWindowProps> = ({ url, onClose }) => {
   const [attempt, setAttempt] = useState(0);
   const [iframeSrc, setIframeSrc] = useState<string | null>(null);
   const [autoOpened, setAutoOpened] = useState(false);
+  const lastKeyRef = useRef<string>('');
+  const prevBlobRef = useRef<string | null>(null);
 
   // Directly use the built index.html path first. This avoids Blob-relative asset path issues.
   useEffect(() => {
     let cancelled = false;
     let createdBlob: string | null = null;
+    const key = `${iframeSrcCandidate}|${attempt}`;
+    // avoid re-running the expensive fetch/rewrite if we've already applied this key
+    if (lastKeyRef.current === key) return;
 
     async function fetchAndRewrite() {
       setLoaded(false);
@@ -93,12 +98,19 @@ const InAppWindow: React.FC<InAppWindowProps> = ({ url, onClose }) => {
         // Create blob URL and use it as iframe src so relative references resolved against absolute URLs we rewrote above
         const blob = new Blob([rewritten], { type: 'text/html' });
         createdBlob = URL.createObjectURL(blob);
+        // revoke previous blob if present
+        if (prevBlobRef.current) {
+          try { URL.revokeObjectURL(prevBlobRef.current); } catch (e) { /* ignore */ }
+        }
+        prevBlobRef.current = createdBlob;
+        lastKeyRef.current = key;
         setIframeSrc(createdBlob);
         return;
       } catch (err) {
         console.warn('[InAppWindow] fetch/rewrite failed, falling back to direct src', err);
         // fallback to direct src so browser loads assets from server paths
-        if (!cancelled) {
+          if (!cancelled) {
+          lastKeyRef.current = key;
           setIframeSrc(iframeSrcCandidate);
           setError('빌드된 파일을 리라이트하지 못했습니다. 직접 경로로 로드합니다.');
         }
@@ -129,7 +141,9 @@ const InAppWindow: React.FC<InAppWindowProps> = ({ url, onClose }) => {
     return () => {
       cancelled = true;
       clearTimeout(t);
-      if (createdBlob) URL.revokeObjectURL(createdBlob);
+      if (createdBlob) {
+        try { URL.revokeObjectURL(createdBlob); } catch (e) { /* ignore */ }
+      }
     };
   }, [iframeSrcCandidate, attempt]);
 
