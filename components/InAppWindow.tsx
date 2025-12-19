@@ -208,7 +208,9 @@ const InAppWindow: React.FC<InAppWindowProps> = ({ url, onClose }) => {
           className="inapp-iframe"
           src={iframeSrc ?? undefined}
           title={url}
-          sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+          // Note: removing `allow-same-origin` strengthens sandboxing but may restrict some pages.
+          // If the framed site requires same-origin access, the '새 탭으로 열기' fallback will still work.
+          sandbox="allow-scripts allow-forms allow-popups"
           onLoad={() => { setLoaded(true); setError(null); console.log('[InAppWindow] iframe loaded:', iframeSrc ?? iframeSrcCandidate); }}
           onError={() => { console.error('[InAppWindow] iframe onError:', iframeSrc ?? iframeSrcCandidate); setError('iframe 로드 실패 (onError).'); }}
         />
