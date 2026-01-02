@@ -176,12 +176,24 @@ function buildSites() {
       name: displayName,
       url,
       imageUrl,
+      emoji: getEmojiForName(name), // Add deterministic emoji
       category: '내 사이트'
     });
   }
 
   fs.writeFileSync(outFile, JSON.stringify(sites, null, 2), 'utf8');
   console.log('Generated', outFile, 'with', sites.length, 'sites');
+}
+
+// Helper to pick a deterministic emoji based on string hash
+function getEmojiForName(name) {
+  const emojis = ['🚀', '🎨', '🎮', '🎵', '📝', '✨', '💡', '🔥', '🌈', '🧩', '🎲', '🥁', '🎸', '🎹', '🎧', '📸', '🎥', '💻', '🖥️', '📱'];
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const index = Math.abs(hash) % emojis.length;
+  return emojis[index];
 }
 
 buildSites();

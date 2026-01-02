@@ -4,5 +4,6 @@ export interface Website {
   name: string;
   url: string;
   imageUrl: string;
+  emoji?: string;
   category: string;
 }

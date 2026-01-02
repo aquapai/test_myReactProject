@@ -46,8 +46,16 @@ const WebsiteCard: React.FC<WebsiteCardProps> = ({ website, onDelete, onOpen }) 
       }}
     >
       <div className="card-image-container">
-        <img className="card-image" src={website.imageUrl} alt={`Screenshot of ${website.name}`} />
-        <div className="card-overlay"></div>
+        {website.emoji ? (
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-800 to-slate-900 text-6xl select-none group-hover:scale-110 transition-transform duration-500">
+            {website.emoji}
+          </div>
+        ) : (
+          <>
+            <img className="card-image" src={website.imageUrl} alt={`Screenshot of ${website.name}`} />
+            <div className="card-overlay"></div>
+          </>
+        )}
       </div>
 
       <div className="card-content">
