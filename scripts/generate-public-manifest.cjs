@@ -17,6 +17,43 @@ function hasIndexHtml(p) {
   return fs.existsSync(path.join(p, 'index.html')) || fs.existsSync(path.join(p, 'index.htm'));
 }
 
+function fixImports(dir) {
+  const files = fs.readdirSync(dir);
+  for (const file of files) {
+    const fullPath = path.join(dir, file);
+    if (fs.statSync(fullPath).isDirectory()) {
+      fixImports(fullPath);
+      continue;
+    }
+
+    if (file.endsWith('.tsx') || file.endsWith('.ts')) {
+      let content = fs.readFileSync(fullPath, 'utf8');
+      let changed = false;
+      // Replace import ... from './Name' with './Name.tsx' if file exists
+      content = content.replace(/from\s+['"]\.\/([^'"]+)['"]/g, (match, importPath) => {
+        // If it already has extension, ignore
+        if (importPath.endsWith('.tsx') || importPath.endsWith('.ts') || importPath.endsWith('.js')) return match;
+
+        // Check if .tsx exists
+        if (fs.existsSync(path.join(dir, `${importPath}.tsx`))) {
+          changed = true;
+          return `from './${importPath}.tsx'`;
+        }
+        if (fs.existsSync(path.join(dir, `${importPath}.ts`))) {
+          changed = true;
+          return `from './${importPath}.ts'`;
+        }
+        return match;
+      });
+
+      if (changed) {
+        fs.writeFileSync(fullPath, content, 'utf8');
+        console.log('Fixed imports in', fullPath);
+      }
+    }
+  }
+}
+
 function buildSites() {
   if (!fs.existsSync(publicDir)) {
     console.error('public directory not found:', publicDir);
@@ -47,6 +84,13 @@ function buildSites() {
       }
     }
 
+    // Fix imports in .tsx files (add .tsx extension if missing) to allow browser resolution
+    try {
+      fixImports(dirPath);
+    } catch (e) {
+      console.warn('Failed to fix imports in', dirPath, e);
+    }
+
     // Create a wrapped index that rewrites root-relative asset paths to folder-relative
     try {
       const indexPath = path.join(dirPath, 'index.html');
@@ -54,6 +98,16 @@ function buildSites() {
         let html = fs.readFileSync(indexPath, 'utf8');
         // Replace src="/... or href="/... (root-relative) with relative versions
         html = html.replace(/(href|src)=("|')\//g, `$1=$2./`);
+
+        // Inject Babel standalone for in-browser compilation of TSX/JSX
+        if (html.includes('<head>')) {
+          html = html.replace('<head>', '<head>\n    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>');
+        }
+
+        // Convert module scripts to text/babel for Babel to process
+        // Also add data-presets for react and typescript
+        html = html.replace(/<script type="module" src="([^"]+)"/g, '<script type="text/babel" data-type="module" src="$1" data-presets="react,typescript"');
+
         const wrappedPath = path.join(dirPath, 'index.wrapped.html');
         fs.writeFileSync(wrappedPath, html, 'utf8');
       }

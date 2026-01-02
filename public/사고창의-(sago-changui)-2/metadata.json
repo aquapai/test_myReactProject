@@ -1,0 +1,7 @@
+{
+  "name": "사고창의 (Sago Changui)",
+  "description": "AI를 정답 도구가 아닌 사고력 훈련 도구로 활용하여 스스로 생각하는 힘을 기르는 학습 보조 앱",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}

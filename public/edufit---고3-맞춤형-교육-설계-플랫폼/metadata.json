@@ -1,0 +1,7 @@
+{
+  "name": "EduFit - 고3 맞춤형 교육 설계 플랫폼",
+  "description": "인지 심리학 원리를 적용하여 고등학생의 생활 패턴과 학습 습관을 분석하고, 최적의 학습 전략과 교육 방식을 추천하는 개인화 솔루션입니다.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}

@@ -1,1 +1,65 @@
-[]
+[
+  {
+    "id": "blindhire-(블라인드-하이어)",
+    "name": "blindhire (블라인드 하이어)",
+    "url": "/blindhire-(블라인드-하이어)/index.wrapped.html",
+    "imageUrl": "/placeholder-site.png",
+    "category": "내 사이트"
+  },
+  {
+    "id": "brainbreak",
+    "name": "brainbreak",
+    "url": "/brainbreak/index.wrapped.html",
+    "imageUrl": "/placeholder-site.png",
+    "category": "내 사이트"
+  },
+  {
+    "id": "edufit---고3-맞춤형-교육-설계-플랫폼",
+    "name": "edufit   고3 맞춤형 교육 설계 플랫폼",
+    "url": "/edufit---고3-맞춤형-교육-설계-플랫폼/index.wrapped.html",
+    "imageUrl": "/placeholder-site.png",
+    "category": "내 사이트"
+  },
+  {
+    "id": "resume-detective-(이력서-탐정)",
+    "name": "resume detective (이력서 탐정)",
+    "url": "/resume-detective-(이력서-탐정)/index.wrapped.html",
+    "imageUrl": "/placeholder-site.png",
+    "category": "내 사이트"
+  },
+  {
+    "id": "wordflow",
+    "name": "wordflow",
+    "url": "/wordflow/index.wrapped.html",
+    "imageUrl": "/placeholder-site.png",
+    "category": "내 사이트"
+  },
+  {
+    "id": "나도-몰랐던-나란-사람",
+    "name": "나도 몰랐던 나란 사람",
+    "url": "/나도-몰랐던-나란-사람/index.wrapped.html",
+    "imageUrl": "/placeholder-site.png",
+    "category": "내 사이트"
+  },
+  {
+    "id": "불-좀-꺼줄래-(lights-off)",
+    "name": "불 좀 꺼줄래 (lights off)",
+    "url": "/불-좀-꺼줄래-(lights-off)/index.wrapped.html",
+    "imageUrl": "/placeholder-site.png",
+    "category": "내 사이트"
+  },
+  {
+    "id": "사고창의-(sago-changui)-2",
+    "name": "사고창의 (sago changui) 2",
+    "url": "/사고창의-(sago-changui)-2/index.wrapped.html",
+    "imageUrl": "/placeholder-site.png",
+    "category": "내 사이트"
+  },
+  {
+    "id": "포폴-업데이트",
+    "name": "포폴 업데이트",
+    "url": "/포폴-업데이트/index.wrapped.html",
+    "imageUrl": "/placeholder-site.png",
+    "category": "내 사이트"
+  }
+]
