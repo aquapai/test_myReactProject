@@ -1,19 +1,10 @@
 <!DOCTYPE html>
 <html lang="ko">
   <head>
-
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script>
-      window.process = {
-        env: {
-          API_KEY: "AIzaSyDr73mB7NaPI0oIL-xG5mcRM3Clv12hTxQ"
-        }
-      };
-    </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>불 좀 꺼줄래 - 팩트체크 & 후광효과 탐지</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    
     <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <style>
       body {
@@ -40,22 +31,1098 @@
         animation: pulse-halo 2s infinite;
       }
     </style>
-  <script type="importmap">
-{
-  "imports": {
-    "react": "https://aistudiocdn.com/react@^19.2.0",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
-    "react/": "https://aistudiocdn.com/react@^19.2.0/",
-    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
-    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0",
-    "recharts": "https://aistudiocdn.com/recharts@^3.5.1"
-  }
-}
-</script>
+  
 <link rel="stylesheet" href="./index.css">
 </head>
   <body>
     <div id="root"></div>
-  <script type="text/babel" data-type="module" src="./index.tsx" data-presets="react,typescript"></script>
+  
+
+     <!-- Injected by Generator -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script>
+      window.process = { env: { API_KEY: "AIzaSyDr73mB7NaPI0oIL-xG5mcRM3Clv12hTxQ" } };
+    </script>
+    <script type="importmap">
+      {
+        "imports": {
+          "react": "https://esm.sh/react@18.2.0",
+          "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+          "lucide-react": "https://esm.sh/lucide-react@0.263.1",
+          "@google/genai": "https://esm.sh/@google/genai@0.1.1",
+          "recharts": "https://esm.sh/recharts@2.12.0"
+        }
+      }
+    </script>
+    <script type="text/babel" data-type="module" data-presets="react,typescript">
+      
+/* --- Bundled from AnalysisResultView.tsx --- */
+import React, { useState } from 'react';
+
+import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
+import { ShieldCheck, ShieldAlert, AlertOctagon, ExternalLink, Share2, MessageSquare, ThumbsUp, ThumbsDown } from 'lucide-react';
+
+interface AnalysisResultViewProps {
+  result: AnalysisResult;
+  onBack: () => void;
+}
+
+const AnalysisResultView: React.FC<AnalysisResultViewProps> = ({ result, onBack }) => {
+  const [vote, setVote] = useState<'agree' | 'disagree' | null>(null);
+
+  // Button Handlers
+  const handleShare = async () => {
+    const shareData = {
+      title: '불 좀 꺼줄래? - 팩트체크 결과',
+      text: `[${result.truthLabel}] ${result.title}\n후광 지수: ${result.haloScore}%`,
+      url: window.location.href,
+    };
+
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch (err) {
+        console.log('Share canceled');
+      }
+    } else {
+      alert('링크가 복사되었습니다!');
+    }
+  };
+
+  const handleVote = (type: 'agree' | 'disagree') => {
+    if (vote === type) {
+        setVote(null); // toggle off
+        return;
+    }
+    setVote(type);
+    const pointMsg = type === 'agree' ? '+2P 획득!' : '의견이 반영되었습니다.';
+    // Simple toast simulation
+    const toast = document.createElement('div');
+    toast.className = 'fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-yellow-400 text-black font-bold px-4 py-2 rounded-full shadow-lg z-50 animate-bounce';
+    toast.innerText = pointMsg;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 2000);
+  };
+
+  const handleDiscussion = () => {
+      alert("토론 스레드 기능은 준비 중입니다.");
+  }
+
+  // Determine colors based on Truth Label
+  const getLabelColor = (label: TruthLabel) => {
+    switch (label) {
+      case TruthLabel.TRUE: return 'text-green-500 border-green-500 bg-green-950/30';
+      case TruthLabel.FALSE: return 'text-red-500 border-red-500 bg-red-950/30';
+      case TruthLabel.MIXED: return 'text-orange-500 border-orange-500 bg-orange-950/30';
+      case TruthLabel.UNVERIFIED: return 'text-zinc-400 border-zinc-500 bg-zinc-800/50';
+    }
+  };
+
+  const getLabelIcon = (label: TruthLabel) => {
+      switch (label) {
+      case TruthLabel.TRUE: return <ShieldCheck size={20} className="mr-2" />;
+      case TruthLabel.FALSE: return <AlertOctagon size={20} className="mr-2" />;
+      default: return <ShieldAlert size={20} className="mr-2" />;
+    }
+  }
+
+  // Halo Chart Data
+  const haloData = [
+    { name: 'Halo', value: result.haloScore },
+    { name: 'Clean', value: 100 - result.haloScore },
+  ];
+  const haloColor = result.haloScore > 70 ? '#ef4444' : result.haloScore > 40 ? '#f59e0b' : '#22c55e';
+
+  return (
+    <div className="h-full bg-zinc-950 text-white overflow-y-auto pb-24 animate-in fade-in slide-in-from-bottom-4 duration-500 hide-scrollbar">
+      {/* Header */}
+      <div className="sticky top-0 z-30 bg-zinc-950/80 backdrop-blur-md border-b border-zinc-800 p-4 flex items-center justify-between">
+        <button onClick={onBack} className="text-zinc-400 hover:text-white text-base font-bold font-display">← 뒤로가기</button>
+        <span className="font-black text-yellow-400 text-lg font-display tracking-tight">팩트 분석 리포트</span>
+        <button onClick={handleShare} className="text-zinc-400 hover:text-yellow-400 transition-colors"><Share2 size={20} /></button>
+      </div>
+
+      <div className="p-6 space-y-8">
+        {/* Title & Verdict */}
+        <div className="text-center">
+          <div className={`inline-flex items-center px-4 py-1.5 rounded-lg border-2 ${getLabelColor(result.truthLabel)} mb-4 font-black text-sm tracking-wide shadow-[4px_4px_0px_0px_rgba(0,0,0,0.5)] transform -rotate-2`}>
+            {getLabelIcon(result.truthLabel)}
+            {result.truthLabel === 'TRUE' && '사실 검증됨'}
+            {result.truthLabel === 'FALSE' && '거짓 판정'}
+            {result.truthLabel === 'MIXED' && '일부 사실/거짓'}
+            {result.truthLabel === 'UNVERIFIED' && '검증 불가'}
+          </div>
+          <h2 className="text-2xl font-display leading-snug mb-2 break-keep">{result.title}</h2>
+          <p className="text-zinc-500 text-sm font-medium">신뢰도 점수: <span className="text-zinc-300">{result.confidenceScore}점</span></p>
+        </div>
+
+        {/* Halo Meter */}
+        <div className="bg-zinc-900 rounded-2xl p-6 border-2 border-zinc-800 relative overflow-hidden shadow-lg">
+          <div className="absolute top-0 right-0 p-3 opacity-10">
+            <AlertOctagon size={100} />
+          </div>
+          <div className="flex flex-col items-center">
+            <h3 className="text-base font-black text-white mb-4 bg-zinc-800 px-3 py-1 rounded-full">후광 지수 (Halo Score)</h3>
+            
+            {/* 
+              Recharts Fix: 
+              1. Enforce specific pixel height with inline style.
+              2. Use width: '100%' with explicit block display.
+            */}
+            <div style={{ width: '100%', height: '160px', minHeight: '160px' }} className="relative">
+               <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={haloData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={70}
+                    startAngle={180}
+                    endAngle={0}
+                    paddingAngle={0}
+                    dataKey="value"
+                    stroke="none"
+                  >
+                    <Cell key="halo" fill={haloColor} />
+                    <Cell key="clean" fill="#27272a" />
+                  </Pie>
+                  <text x="50%" y="45%" textAnchor="middle" dominantBaseline="middle" className="fill-white text-4xl font-black font-display">
+                     {result.haloScore}
+                  </text>
+                  <text x="50%" y="60%" textAnchor="middle" dominantBaseline="middle" className="fill-zinc-500 text-xs font-bold">
+                     / 100
+                  </text>
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="absolute bottom-2 w-full text-center text-xs font-bold text-zinc-400 pointer-events-none">
+                {result.haloScore > 70 ? '⚠️ 매우 자극적/왜곡됨' : result.haloScore > 30 ? '⚠️ 다소 자극적' : '✅ 객관적'}
+              </div>
+            </div>
+            
+            {/* Halo Factors */}
+            <div className="flex flex-wrap gap-2 justify-center mt-4">
+              {result.haloFactors.map((factor, idx) => (
+                <span key={idx} className="px-2 py-1 bg-zinc-950 text-red-400 text-xs font-bold rounded border border-red-900/50">
+                  #{factor}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Summary */}
+        <div>
+           <h3 className="text-xl font-display text-white mb-3 flex items-center gap-2">
+             <span className="w-2 h-6 bg-yellow-400 skew-x-[-12deg]"></span>
+             분석 요약
+           </h3>
+           <div className="bg-zinc-900/50 p-4 rounded-xl border-l-4 border-yellow-400 text-sm text-zinc-300 leading-relaxed font-medium">
+             {result.summary}
+           </div>
+        </div>
+
+        {/* Key Points */}
+        <div>
+           <h3 className="text-xl font-display text-white mb-3">팩트체크 상세</h3>
+           <ul className="space-y-3">
+             {result.keyPoints.map((point, idx) => (
+               <li key={idx} className="flex gap-3 text-sm text-zinc-300 items-start">
+                 <span className="flex-shrink-0 w-6 h-6 rounded-md bg-zinc-800 text-yellow-400 flex items-center justify-center text-sm font-black border border-zinc-700 shadow-sm">
+                   {idx + 1}
+                 </span>
+                 <span className="mt-0.5 font-medium">{point}</span>
+               </li>
+             ))}
+           </ul>
+        </div>
+
+        {/* Sources */}
+        {result.sources.length > 0 && (
+          <div>
+             <h3 className="text-xl font-display text-white mb-3">검증 근거 자료</h3>
+             <div className="space-y-2">
+               {result.sources.map((source, idx) => (
+                 <a 
+                   key={idx} 
+                   href={source.uri} 
+                   target="_blank" 
+                   rel="noopener noreferrer"
+                   className="block bg-zinc-900 hover:bg-zinc-800 transition p-3 rounded-lg border border-zinc-800 group active:scale-[0.99]"
+                 >
+                   <div className="flex justify-between items-start">
+                     <span className="text-sm text-blue-400 font-bold line-clamp-1 group-hover:underline decoration-2 underline-offset-2">{source.title}</span>
+                     <ExternalLink size={14} className="text-zinc-600 group-hover:text-blue-400 mt-1 shrink-0" />
+                   </div>
+                   <span className="text-xs text-zinc-600 block mt-1 truncate">{source.uri}</span>
+                 </a>
+               ))}
+             </div>
+          </div>
+        )}
+
+        {/* Community Action */}
+        <div className="pt-6 border-t-2 border-dashed border-zinc-800">
+           <p className="text-sm text-center text-zinc-400 mb-4 font-bold">결과에 대해 어떻게 생각하시나요?</p>
+           <div className="flex gap-3">
+             <button 
+                onClick={() => handleVote('agree')}
+                className={`flex-1 flex flex-col items-center justify-center py-4 rounded-xl border-2 transition-all active:scale-95 ${
+                    vote === 'agree' 
+                    ? 'bg-green-500 border-green-400 text-black shadow-[0px_0px_15px_rgba(34,197,94,0.4)]' 
+                    : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:border-green-500 hover:text-green-500'
+                }`}
+             >
+               <ThumbsUp size={24} className="mb-1" strokeWidth={3} />
+               <span className="text-xs font-black">동의함 (+2P)</span>
+             </button>
+             <button 
+                onClick={() => handleVote('disagree')}
+                className={`flex-1 flex flex-col items-center justify-center py-4 rounded-xl border-2 transition-all active:scale-95 ${
+                    vote === 'disagree' 
+                    ? 'bg-red-500 border-red-400 text-white shadow-[0px_0px_15px_rgba(239,68,68,0.4)]' 
+                    : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:border-red-500 hover:text-red-500'
+                }`}
+             >
+               <ThumbsDown size={24} className="mb-1" strokeWidth={3} />
+               <span className="text-xs font-black">반대함</span>
+             </button>
+           </div>
+           <button 
+             onClick={handleDiscussion}
+             className="w-full mt-4 flex items-center justify-center gap-2 text-zinc-400 text-sm py-3 rounded-xl hover:bg-zinc-900 transition font-bold"
+           >
+             <MessageSquare size={18} />
+             토론장 입장 (댓글 12개)
+           </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+AnalysisResultView;
+
+/* --- Bundled from Feed.tsx --- */
+import React from 'react';
+
+import { AlertTriangle, TrendingUp, HelpCircle } from 'lucide-react';
+
+const mockFeed: NewsCardData[] = [
+  {
+    id: '1',
+    title: '"소금물 마시면 면역력 100배 증가" 주장 논란',
+    truthLabel: TruthLabel.FALSE,
+    haloScore: 92,
+    timestamp: '10분 전',
+  },
+  {
+    id: '2',
+    title: '정부, 신규 청년 도약 계좌 가이드라인 발표',
+    truthLabel: TruthLabel.TRUE,
+    haloScore: 12,
+    timestamp: '1시간 전',
+  },
+  {
+    id: '3',
+    title: '화성에서 고대 문명 유적 발견되었다?',
+    truthLabel: TruthLabel.UNVERIFIED,
+    haloScore: 88,
+    timestamp: '3시간 전',
+  },
+  {
+    id: '4',
+    title: 'AI 반도체 주가, 내년 500% 폭등 전망 리포트',
+    truthLabel: TruthLabel.MIXED,
+    haloScore: 75,
+    timestamp: '5시간 전',
+  },
+  {
+    id: '5',
+    title: '초전도체 상용화 임박? 학계 반응은 냉담',
+    truthLabel: TruthLabel.MIXED,
+    haloScore: 60,
+    timestamp: '6시간 전',
+  },
+  {
+    id: '6',
+    title: '매일 사과 하나면 의사가 필요 없다: 과학적 검증',
+    truthLabel: TruthLabel.TRUE,
+    haloScore: 40,
+    timestamp: '8시간 전',
+  }
+];
+
+const Feed: React.FC = () => {
+  const handleCardClick = () => {
+      alert("이건 예시 데이터라구! 홈에서 진짜 분석을 해봐!");
+  }
+
+  return (
+    <div className="bg-zinc-950 h-full overflow-y-auto pb-20 p-6 text-white hide-scrollbar">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-display flex items-center">
+          실시간 <span className="text-yellow-400 mx-2 underline decoration-4 underline-offset-2">감시</span> 중
+        </h2>
+        <div className="flex items-center gap-1 text-xs text-red-500 font-bold animate-pulse">
+            <span className="w-2 h-2 rounded-full bg-red-500"></span> LIVE
+        </div>
+      </div>
+      
+      <div className="space-y-4">
+        {mockFeed.map((card) => (
+          <div 
+            key={card.id} 
+            onClick={handleCardClick}
+            className="bg-zinc-900 border-2 border-zinc-800 rounded-xl p-4 active:scale-[0.98] transition-all hover:border-yellow-500/50 cursor-pointer shadow-[4px_4px_0px_0px_rgba(24,24,27,1)]"
+          >
+            <div className="flex justify-between items-start mb-3">
+              <div className="flex gap-2 items-center">
+                {card.truthLabel === TruthLabel.FALSE && <span className="bg-red-500 text-white text-[10px] px-2 py-1 rounded font-black border border-red-700 shadow-sm">거짓</span>}
+                {card.truthLabel === TruthLabel.TRUE && <span className="bg-green-500 text-black text-[10px] px-2 py-1 rounded font-black border border-green-700 shadow-sm">사실</span>}
+                {card.truthLabel === TruthLabel.MIXED && <span className="bg-orange-500 text-black text-[10px] px-2 py-1 rounded font-black border border-orange-700 shadow-sm">복합</span>}
+                {card.truthLabel === TruthLabel.UNVERIFIED && <span className="bg-zinc-700 text-zinc-300 text-[10px] px-2 py-1 rounded font-black">판단보류</span>}
+                <span className="text-zinc-500 text-[10px] font-mono">{card.timestamp}</span>
+              </div>
+              <div className="flex items-center gap-1 text-[10px] font-bold text-zinc-400 bg-zinc-950 px-2 py-1 rounded-md border border-zinc-800">
+                <TrendingUp size={12} className={card.haloScore > 50 ? 'text-red-500' : 'text-green-500'} />
+                MSG {card.haloScore}%
+              </div>
+            </div>
+            <h3 className="font-bold text-base leading-snug mb-4 line-clamp-2">
+              {card.title}
+            </h3>
+            <div className="flex justify-between items-center pt-3 border-t-2 border-dashed border-zinc-800/50">
+              <span className="text-xs text-zinc-500 font-medium">🕵️ 42명이 확인 중</span>
+              <button className="text-xs text-yellow-400 hover:text-white font-black bg-zinc-800 px-3 py-1 rounded-full transition-colors">결과 보기</button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+Feed;
+
+/* --- Bundled from Home.tsx --- */
+import React, { useState } from 'react';
+import { Search, Lightbulb, AlertTriangle, ArrowRight, Zap } from 'lucide-react';
+
+
+
+interface HomeProps {
+  onAnalyzeStart: () => void;
+  onAnalyzeComplete: (result: AnalysisResult) => void;
+}
+
+const Home: React.FC<HomeProps> = ({ onAnalyzeStart, onAnalyzeComplete }) => {
+  const [inputText, setInputText] = useState('');
+
+  const handleAnalyze = async () => {
+    if (!inputText.trim()) return;
+    
+    onAnalyzeStart();
+    const result = await analyzeNews(inputText);
+    onAnalyzeComplete(result);
+  };
+
+  return (
+    <div className="flex flex-col h-full bg-zinc-950 text-white overflow-y-auto pb-20">
+      {/* Breaking News Banner - B-grade style */}
+      <div className="bg-yellow-400 border-b-4 border-black py-2 px-4 flex items-center gap-2 overflow-hidden whitespace-nowrap shadow-md z-10">
+        <AlertTriangle size={18} className="text-black shrink-0 animate-bounce" fill="white" />
+        <p className="text-sm text-black font-black font-display animate-marquee">
+          [속보] "숨만 쉬어도 살 빠진다" 기사, 낚시 판정... 헬스장 관장님 격노
+        </p>
+      </div>
+
+      <div className="px-6 pt-12 pb-8 flex flex-col items-center justify-center grow min-h-[60vh]">
+        <div className="mb-6 relative group">
+           <div className="absolute inset-0 bg-yellow-400 blur-3xl rounded-full opacity-20 group-hover:opacity-40 transition-opacity"></div>
+           <Lightbulb size={80} className="text-yellow-400 relative z-10 drop-shadow-[0_0_15px_rgba(250,204,21,0.5)] transform group-hover:rotate-12 transition-transform duration-300" strokeWidth={1.5} />
+           <div className="absolute -right-2 -top-2 bg-red-500 text-white text-[10px] font-black px-2 py-1 rounded-full rotate-12 border-2 border-black">
+             OFF!
+           </div>
+        </div>
+        
+        <h1 className="text-5xl font-display mb-2 text-center leading-tight">
+          불 좀 <span className="text-yellow-400 inline-block transform hover:scale-110 transition-transform cursor-pointer">꺼줄래?</span>
+        </h1>
+        <p className="text-zinc-400 text-base text-center mb-8 max-w-[280px] font-medium break-keep">
+          눈부신 어그로 뒤에 숨은 <span className="text-white border-b-2 border-yellow-400">팩트</span>만 발라드림.
+        </p>
+
+        <div className="w-full max-w-md bg-zinc-900 rounded-xl p-2 border-2 border-zinc-800 focus-within:border-yellow-400 focus-within:ring-4 focus-within:ring-yellow-400/20 transition-all shadow-[4px_4px_0px_0px_rgba(39,39,42,1)] focus-within:shadow-[4px_4px_0px_0px_rgba(250,204,21,1)]">
+          <textarea
+            className="w-full bg-transparent text-white p-3 min-h-[100px] resize-none focus:outline-none text-base placeholder-zinc-600 font-medium"
+            placeholder="여기에 낚시성 기사 링크나 카톡 찌라시 붙여넣어 보셈."
+            value={inputText}
+            onChange={(e) => setInputText(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleAnalyze();
+              }
+            }}
+          />
+          <div className="flex justify-between items-center px-2 pb-2">
+             <span className="text-xs text-zinc-500 font-bold font-mono">POWERED BY GEMINI</span>
+             <button 
+                onClick={handleAnalyze}
+                disabled={!inputText.trim()}
+                className="bg-yellow-400 hover:bg-yellow-300 active:translate-y-1 active:shadow-none disabled:opacity-50 disabled:cursor-not-allowed text-black rounded-lg p-2 transition-all border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+             >
+               <ArrowRight size={24} strokeWidth={3} />
+             </button>
+          </div>
+        </div>
+
+        {/* Quick Tips - B-grade style */}
+        <div className="mt-12 w-full max-w-md grid grid-cols-2 gap-4">
+          <div className="bg-zinc-900 p-4 rounded-xl border-2 border-zinc-800 hover:-translate-y-1 transition-transform">
+            <h3 className="text-yellow-400 text-sm font-black mb-1 flex items-center gap-1">
+              <Zap size={14} className="fill-yellow-400" /> MSG(후광)란?
+            </h3>
+            <p className="text-zinc-400 text-xs leading-relaxed break-keep">
+              팩트보다 감성을 자극해서 님들을 낚는 기술임. 제목 어그로, 과장된 썸네일 조심!
+            </p>
+          </div>
+           <div className="bg-zinc-900 p-4 rounded-xl border-2 border-zinc-800 hover:-translate-y-1 transition-transform">
+            <h3 className="text-green-400 text-sm font-black mb-1 flex items-center gap-1">
+              <Search size={14} /> 팩트 체크 팁
+            </h3>
+            <p className="text-zinc-400 text-xs leading-relaxed break-keep">
+              "충격", "경악", "속보" 같은 단어 들어가면 일단 의심부터 하고 보는 게 국룰.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+Home;
+
+/* --- Bundled from Leaderboard.tsx --- */
+import React from 'react';
+
+
+const mockLeaderboard: LeaderboardEntry[] = [
+  { rank: 1, name: '팩트체커_01', title: '후광 사냥꾼 마스터', points: 4520, avatarColor: 'bg-red-500' },
+  { rank: 2, name: '진실의입', title: '후광 사냥꾼 플래티넘', points: 3890, avatarColor: 'bg-blue-500' },
+  { rank: 3, name: '뉴스감별사', title: '후광 사냥꾼 골드', points: 3100, avatarColor: 'bg-green-500' },
+  { rank: 4, name: '김팩트 (나)', title: '후광 사냥꾼 골드', points: 1250, avatarColor: 'bg-yellow-500' },
+  { rank: 5, name: '정보보호', title: '후광 사냥꾼 실버', points: 980, avatarColor: 'bg-purple-500' },
+  { rank: 6, name: '클린인터넷', title: '후광 사냥꾼 실버', points: 950, avatarColor: 'bg-indigo-500' },
+  { rank: 7, name: '팩트폭격기', title: '후광 사냥꾼 브론즈', points: 800, avatarColor: 'bg-pink-500' },
+  { rank: 8, name: '진실탐사', title: '후광 사냥꾼 브론즈', points: 750, avatarColor: 'bg-orange-500' },
+];
+
+const Leaderboard: React.FC = () => {
+  return (
+    <div className="bg-zinc-950 h-full overflow-y-auto pb-20 p-6 text-white hide-scrollbar">
+      <h2 className="text-2xl font-bold mb-6 font-display">명예의 전당</h2>
+      
+      {/* Top 3 Podium (Simplified visualization) */}
+      <div className="flex items-end justify-center gap-4 mb-10 mt-4">
+        {/* Rank 2 */}
+        <div className="flex flex-col items-center">
+           <div className="w-12 h-12 rounded-full bg-zinc-800 border-2 border-zinc-700 mb-2 overflow-hidden shadow-lg">
+             <div className="w-full h-full bg-blue-500"></div>
+           </div>
+           <div className="w-20 h-24 bg-zinc-800 rounded-t-lg flex flex-col items-center justify-start pt-2 border-t border-x border-zinc-700">
+             <span className="font-bold text-2xl text-zinc-400 font-display">2</span>
+             <span className="text-[10px] text-zinc-500 mt-1">{mockLeaderboard[1].name}</span>
+           </div>
+        </div>
+        {/* Rank 1 */}
+        <div className="flex flex-col items-center z-10">
+           <div className="w-16 h-16 rounded-full bg-zinc-800 border-2 border-yellow-500 mb-2 overflow-hidden shadow-[0_0_15px_rgba(234,179,8,0.3)]">
+              <div className="w-full h-full bg-red-500"></div>
+           </div>
+           <div className="w-24 h-32 bg-gradient-to-b from-yellow-500/20 to-zinc-800 rounded-t-lg flex flex-col items-center justify-start pt-2 border-t border-x border-yellow-500/50">
+             <span className="font-bold text-3xl text-yellow-400 font-display">1</span>
+             <span className="text-xs text-yellow-100 mt-1 font-bold">{mockLeaderboard[0].name}</span>
+           </div>
+        </div>
+        {/* Rank 3 */}
+        <div className="flex flex-col items-center">
+           <div className="w-12 h-12 rounded-full bg-zinc-800 border-2 border-zinc-700 mb-2 overflow-hidden shadow-lg">
+             <div className="w-full h-full bg-green-500"></div>
+           </div>
+           <div className="w-20 h-16 bg-zinc-800 rounded-t-lg flex flex-col items-center justify-start pt-2 border-t border-x border-zinc-700">
+             <span className="font-bold text-xl text-zinc-500 font-display">3</span>
+             <span className="text-[10px] text-zinc-500 mt-1">{mockLeaderboard[2].name}</span>
+           </div>
+        </div>
+      </div>
+
+      <div className="space-y-3">
+        {mockLeaderboard.slice(3).map((entry) => (
+          <div key={entry.rank} className={`flex items-center p-3 rounded-xl border ${entry.rank === 4 ? 'bg-yellow-900/10 border-yellow-500/50' : 'bg-zinc-900 border-zinc-800'}`}>
+            <span className="w-8 text-center font-bold text-zinc-500 font-display">{entry.rank}</span>
+            <div className={`w-8 h-8 rounded-full ${entry.avatarColor} mx-3`}></div>
+            <div className="flex-1">
+               <h4 className={`text-sm font-bold ${entry.rank === 4 ? 'text-yellow-400' : 'text-white'}`}>
+                 {entry.name} {entry.rank === 4 && '(나)'}
+               </h4>
+               <p className="text-[10px] text-zinc-500">{entry.title}</p>
+            </div>
+            <span className="font-mono text-sm text-zinc-300 font-bold">{entry.points.toLocaleString()} P</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+Leaderboard;
+
+/* --- Bundled from LoadingScreen.tsx --- */
+import React from 'react';
+import { Lightbulb, Loader2 } from 'lucide-react';
+
+const LoadingScreen: React.FC = () => {
+  return (
+    <div className="fixed inset-0 bg-zinc-950 z-50 flex flex-col items-center justify-center p-6">
+      <div className="relative">
+        {/* Flickering Light Effect */}
+        <div className="absolute inset-0 bg-yellow-400/30 blur-3xl rounded-full animate-pulse"></div>
+        <Lightbulb size={80} className="text-yellow-400 relative z-10 animate-[pulse_0.5s_infinite]" fill="currentColor" />
+        <Loader2 size={40} className="absolute -bottom-12 left-1/2 -translate-x-1/2 text-zinc-600 animate-spin" />
+      </div>
+      
+      <h2 className="mt-16 text-2xl font-display text-white text-center animate-pulse">
+        거품 걷어내는 중...
+      </h2>
+      <p className="text-zinc-500 text-sm mt-2 text-center font-medium">
+        AI가 기레기력을 측정하고 있습니다.
+      </p>
+
+      {/* Steps */}
+      <div className="mt-12 w-full max-w-xs space-y-4">
+         <div className="flex items-center gap-3 text-sm font-bold text-zinc-500">
+           <div className="w-3 h-3 rounded-full bg-green-500 animate-[bounce_1s_infinite]"></div>
+           <span>1. 기사 내용 뜯어보기</span>
+         </div>
+         <div className="flex items-center gap-3 text-sm font-bold text-zinc-500">
+           <div className="w-3 h-3 rounded-full bg-yellow-500 animate-[bounce_1s_infinite_200ms]"></div>
+           <span>2. 감성팔이/어그로 탐지 (MSG 측정)</span>
+         </div>
+         <div className="flex items-center gap-3 text-sm font-bold text-zinc-500">
+           <div className="w-3 h-3 rounded-full bg-blue-500 animate-[bounce_1s_infinite_400ms]"></div>
+           <span>3. 팩트 DB랑 맞짱 뜨는 중</span>
+         </div>
+      </div>
+    </div>
+  );
+};
+
+LoadingScreen;
+
+/* --- Bundled from Navigation.tsx --- */
+import React from 'react';
+import { Home, Search, Trophy, User } from 'lucide-react';
+
+interface NavigationProps {
+  currentView: string;
+  setView: (view: string) => void;
+}
+
+const Navigation: React.FC<NavigationProps> = ({ currentView, setView }) => {
+  const navItems = [
+    { id: 'home', icon: Home, label: '검증소' },
+    { id: 'feed', icon: Search, label: '감시' },
+    { id: 'leaderboard', icon: Trophy, label: '랭킹' },
+    { id: 'profile', icon: User, label: '내정보' },
+  ];
+
+  return (
+    <nav className="fixed bottom-0 left-0 right-0 bg-zinc-950 border-t-2 border-zinc-800 pb-safe safe-area-inset-bottom z-50">
+      <div className="flex justify-around items-center h-16">
+        {navItems.map((item) => {
+          const Icon = item.icon;
+          const isActive = currentView === item.id;
+          return (
+            <button
+              key={item.id}
+              onClick={() => setView(item.id)}
+              className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-all active:scale-95 ${
+                isActive ? 'text-yellow-400' : 'text-zinc-600 hover:text-zinc-400'
+              }`}
+            >
+              <Icon size={24} strokeWidth={isActive ? 3 : 2} className={isActive ? 'drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]' : ''} />
+              <span className={`text-[10px] ${isActive ? 'font-black' : 'font-medium'}`}>{item.label}</span>
+            </button>
+          );
+        })}
+      </div>
+    </nav>
+  );
+};
+
+Navigation;
+
+/* --- Bundled from Profile.tsx --- */
+import React from 'react';
+
+import { Award, Zap, Activity, Star } from 'lucide-react';
+import { ResponsiveContainer, BarChart, Bar, XAxis, Tooltip } from 'recharts';
+
+const mockUser: UserProfile = {
+  name: "김팩트",
+  title: "후광 사냥꾼 골드",
+  points: 1250,
+  trustIndex: 88,
+  historyCount: 42,
+  badges: ['first_blood', 'truth_seeker', 'halo_breaker'],
+};
+
+const activityData = [
+  { day: '월', count: 2 },
+  { day: '화', count: 5 },
+  { day: '수', count: 3 },
+  { day: '목', count: 8 },
+  { day: '금', count: 1 },
+  { day: '토', count: 0 },
+  { day: '일', count: 4 },
+];
+
+const Profile: React.FC = () => {
+  return (
+    <div className="bg-zinc-950 h-full overflow-y-auto pb-20 text-white hide-scrollbar">
+      {/* Profile Header Card */}
+      <div className="relative bg-yellow-400 p-8 pb-12 rounded-b-[2rem] border-b-4 border-zinc-900 shadow-xl overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-full opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-black to-transparent"></div>
+        
+        <div className="relative z-10 flex flex-col items-center">
+          <div className="w-24 h-24 rounded-full bg-black p-1 mb-4 shadow-[0px_0px_0px_4px_rgba(255,255,255,0.3)]">
+            <div className="w-full h-full rounded-full bg-zinc-900 flex items-center justify-center text-4xl animate-[bounce_2s_infinite]">
+              🦁
+            </div>
+          </div>
+          <h2 className="text-3xl font-display text-black mb-1">{mockUser.name}</h2>
+          <span className="text-black text-xs font-black bg-white/30 px-3 py-1 rounded-full border border-black/10">
+            {mockUser.title}
+          </span>
+
+          <div className="grid grid-cols-3 gap-4 mt-8 w-full">
+            <div className="text-center bg-black/10 p-2 rounded-xl backdrop-blur-sm border border-black/5">
+              <p className="text-black/60 text-[10px] font-bold mb-1">내 포인트</p>
+              <p className="text-xl font-display text-black">{mockUser.points} P</p>
+            </div>
+             <div className="text-center bg-black/10 p-2 rounded-xl backdrop-blur-sm border border-black/5">
+              <p className="text-black/60 text-[10px] font-bold mb-1">신뢰력</p>
+              <p className="text-xl font-display text-black">{mockUser.trustIndex}</p>
+            </div>
+             <div className="text-center bg-black/10 p-2 rounded-xl backdrop-blur-sm border border-black/5">
+              <p className="text-black/60 text-[10px] font-bold mb-1">팩폭 횟수</p>
+              <p className="text-xl font-display text-black">{mockUser.historyCount}회</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="p-6 space-y-6">
+        {/* Activity Chart */}
+        <div>
+          <h3 className="text-lg font-display mb-4 flex items-center gap-2">
+            <Activity size={18} className="text-green-500" />
+            이번 주 활약상
+          </h3>
+          
+          {/* 
+            Recharts Fix:
+            1. Use flex column to ensure proper layout behavior
+            2. Force specific height on container
+          */}
+          <div className="bg-zinc-900 rounded-xl p-4 border-2 border-zinc-800 flex flex-col justify-center" style={{ height: '180px', minHeight: '180px' }}>
+             <div style={{ width: '100%', height: '100%' }}>
+               <ResponsiveContainer width="100%" height="100%">
+                 <BarChart data={activityData}>
+                   <XAxis dataKey="day" tick={{fill: '#71717a', fontSize: 12, fontWeight: 'bold'}} axisLine={false} tickLine={false} />
+                   <Tooltip cursor={{fill: '#27272a'}} contentStyle={{backgroundColor: '#18181b', border: '2px solid #27272a', borderRadius: '8px', color: '#fff', fontWeight: 'bold'}} />
+                   <Bar dataKey="count" fill="#facc15" radius={[4, 4, 0, 0]} barSize={20} />
+                 </BarChart>
+               </ResponsiveContainer>
+             </div>
+          </div>
+        </div>
+
+        {/* Badges */}
+        <div>
+           <h3 className="text-lg font-display mb-4 flex items-center gap-2">
+            <Award size={18} className="text-purple-500" />
+            획득한 훈장
+          </h3>
+          <div className="grid grid-cols-3 gap-3">
+             <div onClick={() => alert('첫 검증: 처음으로 진실을 마주한 자')} className="aspect-square bg-zinc-900 rounded-xl flex flex-col items-center justify-center border-2 border-zinc-800 hover:border-yellow-500 hover:bg-zinc-800 transition cursor-pointer group active:scale-95">
+                <Zap size={32} className="text-zinc-600 group-hover:text-yellow-400 mb-2 transition-colors" />
+                <span className="text-[10px] text-zinc-500 font-bold group-hover:text-white">뉴비 탈출</span>
+             </div>
+             <div onClick={() => alert('팩트 수호자: 거짓 뉴스 10개를 때려잡음')} className="aspect-square bg-zinc-900 rounded-xl flex flex-col items-center justify-center border-2 border-yellow-500/30 hover:border-yellow-500 transition cursor-pointer group active:scale-95 shadow-[0_0_15px_rgba(250,204,21,0.1)]">
+                <Star size={32} className="text-yellow-400 mb-2 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)] animate-pulse" />
+                <span className="text-[10px] text-zinc-300 font-bold group-hover:text-white">팩트 수호자</span>
+             </div>
+             <div className="aspect-square bg-zinc-900 rounded-xl flex flex-col items-center justify-center border-2 border-dashed border-zinc-800 opacity-50">
+                <span className="text-[10px] text-zinc-600 font-bold">???</span>
+             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+Profile;
+
+/* --- Bundled from geminiService.ts --- */
+import { GoogleGenAI } from "@google/genai";
+
+
+// Initialize Gemini Client
+// CRITICAL: process.env.API_KEY is handled by the environment
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+
+const MODEL_NAME = 'gemini-2.5-flash';
+
+// Helper to extract JSON from markdown code blocks or raw text
+function cleanJsonString(text: string): string {
+  if (!text) return "{}";
+  
+  // First try to find a JSON block in markdown
+  const match = text.match(/```json\n([\s\S]*?)\n```/);
+  if (match) return match[1];
+
+  // If no markdown, try to find the first '{' and last '}'
+  const firstOpen = text.indexOf('{');
+  const lastClose = text.lastIndexOf('}');
+  
+  if (firstOpen !== -1 && lastClose !== -1) {
+    return text.substring(firstOpen, lastClose + 1);
+  }
+  
+  return text;
+}
+
+const analyzeNews = async (input: string): Promise<AnalysisResult> => {
+  try {
+    const prompt = `
+      Apply the **Protocol-100 Fact-Assessment Framework** strictly to analyze the following input text/claim.
+      
+      Input text: "${input}"
+
+      ────────────────────────────────────────
+      [Protocol-100 Fact-Assessment Framework]
+
+      1. 원문 구조 분석
+         - 텍스트의 주장, 인용, 수치, 인물, 사건을 항목별로 분해한다.
+         - 주장과 의견, 사실 진술을 명확히 구분한다.
+
+      2. 출처 검증 (Source Verification)
+         - 텍스트가 직접 언급하는 출처를 식별하고 실존 여부, 신뢰도, 맥락을 평가한다.
+         - 익명·출처 불명·단일 출처의 경우 위험도를 상향 조정한다.
+
+      3. 사실 검증 (Claim Verification) using Google Search Tool
+         - 주요 주장을 검증 가능한 형태로 재구성하여 검색한다.
+         - 알려진 데이터, 관측 가능한 사실, 공식 기록과 대조한다.
+
+      4. 논리·언어 패턴 분석 (Logic & Language Pattern)
+         - 공포 조성, 과도한 일반화, 이분법, 감정적 호소(Halo Effect), 음모론적 구조를 탐지한다.
+         - "충격 폭로", "절대 밝힐 수 없는" 등의 회피성 표현을 검출한다.
+
+      5. 조작 신호 탐지 (Manipulation Detection)
+         - 비정상적 통계, 출처 없는 수치, 인용 왜곡 가능성을 평가한다.
+
+      6. 가능성 판단 (Probability Judgment)
+         - 위 1~5 항목을 종합하여 다음 중 하나로 결정한다:
+           (A) 사실 가능성 (Facts Likely)
+           (B) 부정확 가능성 (Inaccurate Likely - 왜곡/과장 포함)
+           (C) 허위 가능성 (False Likely - 핵심이 사실과 충돌)
+
+      7. 결과 산출
+         - 최종 분류: A/B/C 중 하나
+         - 핵심 근거: 3개 이상
+         - 논리 오류 및 조작 신호 명시
+      ────────────────────────────────────────
+
+      **OUTPUT INSTRUCTIONS**:
+      - The output MUST be a **Plain Text String** containing a valid JSON object.
+      - Do NOT use Markdown formatting (no \`\`\`json).
+      - Do NOT use MIME types.
+      - **Language**: Korean (Professional, Objective Tone).
+
+      **Mapping Protocol-100 to JSON Fields**:
+      - truthLabel: 
+          (A) -> "TRUE"
+          (B) -> "MIXED"
+          (C) -> "FALSE"
+          If unknown -> "UNVERIFIED"
+      - haloScore: Score (0-100) based on Step 4 (Language Pattern) & Step 5 (Manipulation). High score means high emotional/manipulative content.
+      - haloFactors: List patterns found in Step 4 & 5 (e.g., "공포 조성", "출처 불명 수치").
+      - keyPoints: The "Core Evidence" and "Verification Results" from Step 7.
+
+      **JSON Structure**:
+      {
+        "title": "객관적인 기사 제목 (Korean)",
+        "summary": "Protocol-100 분석 요약 (2 sentences, Professional Korean)",
+        "truthLabel": "TRUE" | "FALSE" | "MIXED" | "UNVERIFIED",
+        "confidenceScore": number (0-100),
+        "haloScore": number (0-100),
+        "haloFactors": ["Factor 1", "Factor 2"],
+        "keyPoints": ["Evidence 1", "Evidence 2", "Evidence 3"]
+      }
+
+      If you cannot access the URL content, return a plain text error message, NOT a JSON.
+    `;
+
+    // Guidelines: Do NOT set responseMimeType or responseSchema when using googleSearch tool.
+    const response = await ai.models.generateContent({
+      model: MODEL_NAME,
+      contents: prompt,
+      config: {
+        tools: [{ googleSearch: {} }],
+      },
+    });
+
+    const rawText = response.text || "";
+    const jsonText = cleanJsonString(rawText);
+    
+    let data;
+    try {
+      data = JSON.parse(jsonText);
+    } catch (e) {
+      // If parsing fails, assume the model returned a plain text error message (as requested in prompt)
+      // or the response was malformed. Use the raw text as the summary if it's reasonable.
+      console.warn("JSON Parse failed. Treating response as plain text error message.", rawText);
+      
+      const fallbackSummary = rawText.length > 0 && rawText.length < 300 
+        ? rawText 
+        : "Protocol-100 분석을 완료할 수 없습니다. 데이터 형식을 확인해주세요.";
+
+      return {
+        title: "분석 불가",
+        summary: fallbackSummary,
+        truthLabel: TruthLabel.UNVERIFIED,
+        confidenceScore: 0,
+        haloScore: 0,
+        haloFactors: ["분석 실패"],
+        keyPoints: [],
+        sources: []
+      };
+    }
+
+    // Extract grounding sources
+    const groundingChunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks || [];
+    const sources = groundingChunks
+      .filter((chunk: any) => chunk.web?.uri && chunk.web?.title)
+      .map((chunk: any) => ({
+        title: chunk.web.title,
+        uri: chunk.web.uri,
+      }));
+
+    // Remove duplicates based on URI
+    const uniqueSources = Array.from(new Map(sources.map((item: any) => [item.uri, item])).values());
+
+    return {
+      title: data.title || "분석된 기사",
+      summary: data.summary || "요약을 생성할 수 없습니다.",
+      truthLabel: (data.truthLabel as TruthLabel) || TruthLabel.UNVERIFIED,
+      confidenceScore: data.confidenceScore || 0,
+      haloScore: data.haloScore || 0,
+      haloFactors: data.haloFactors || [],
+      keyPoints: data.keyPoints || [],
+      sources: uniqueSources as any[],
+    };
+
+  } catch (error) {
+    console.error("Gemini Analysis Error:", error);
+    // Return a fallback error result
+    return {
+      title: "시스템 오류",
+      summary: "Protocol-100 실행 중 문제가 발생했습니다.",
+      truthLabel: TruthLabel.UNVERIFIED,
+      confidenceScore: 0,
+      haloScore: 0,
+      haloFactors: ["네트워크/서버 오류"],
+      keyPoints: [],
+      sources: []
+    };
+  }
+};
+
+/* --- Bundled from App.tsx --- */
+import React, { useState } from 'react';
+
+
+
+
+
+
+
+
+
+function App() {
+  const [currentView, setCurrentView] = useState('home');
+  const [isLoading, setIsLoading] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
+
+  const handleAnalyzeStart = () => {
+    setIsLoading(true);
+  };
+
+  const handleAnalyzeComplete = (result: AnalysisResult) => {
+    setAnalysisResult(result);
+    setIsLoading(false);
+    setCurrentView('analysis');
+  };
+
+  const handleBackToHome = () => {
+    setAnalysisResult(null);
+    setCurrentView('home');
+  };
+
+  const renderContent = () => {
+    if (isLoading) return <LoadingScreen />;
+
+    if (currentView === 'analysis' && analysisResult) {
+      return <AnalysisResultView result={analysisResult} onBack={handleBackToHome} />;
+    }
+
+    switch (currentView) {
+      case 'home':
+        return <Home onAnalyzeStart={handleAnalyzeStart} onAnalyzeComplete={handleAnalyzeComplete} />;
+      case 'feed':
+        return <Feed />;
+      case 'leaderboard':
+        return <Leaderboard />;
+      case 'profile':
+        return <Profile />;
+      default:
+        return <Home onAnalyzeStart={handleAnalyzeStart} onAnalyzeComplete={handleAnalyzeComplete} />;
+    }
+  };
+
+  return (
+    <div className="h-screen w-full bg-zinc-950 text-white overflow-hidden flex flex-col font-sans">
+      <div className="flex-grow overflow-hidden relative">
+        {renderContent()}
+      </div>
+      
+      {!isLoading && currentView !== 'analysis' && (
+        <Navigation currentView={currentView} setView={setCurrentView} />
+      )}
+    </div>
+  );
+}
+
+App;
+
+
+/* --- Bundled from types.ts --- */
+export enum TruthLabel {
+  TRUE = 'TRUE',
+  FALSE = 'FALSE',
+  MIXED = 'MIXED',
+  UNVERIFIED = 'UNVERIFIED',
+}
+
+export interface GroundingSource {
+  title: string;
+  uri: string;
+}
+
+export interface AnalysisResult {
+  title: string; // The detected title or headline
+  summary: string;
+  truthLabel: TruthLabel;
+  confidenceScore: number; // 0-100
+  haloScore: number; // 0-100 (High means high distortion/sensationalism)
+  haloFactors: string[]; // Reasons why it has a halo effect (e.g., "Emotional language")
+  keyPoints: string[];
+  sources: GroundingSource[];
+}
+
+export interface UserProfile {
+  name: string;
+  title: string; // e.g., "후광 사냥꾼 브론즈"
+  points: number;
+  trustIndex: number; // 0-100
+  historyCount: number;
+  badges: string[];
+}
+
+export interface NewsCardData {
+  id: string;
+  title: string;
+  thumbnail?: string;
+  truthLabel: TruthLabel;
+  haloScore: number;
+  timestamp: string;
+}
+
+export interface LeaderboardEntry {
+  rank: number;
+  name: string;
+  title: string;
+  points: number;
+  avatarColor: string;
+}
+
+
+/* --- Bundled from vite.config.ts --- */
+import path from 'path';
+import { defineConfig, loadEnv } from 'vite';
+import react from '@vitejs/plugin-react';
+
+defineConfig(({ mode }) => {
+    const env = loadEnv(mode, '.', '');
+    return {
+      server: {
+        port: 3000,
+        host: '0.0.0.0',
+      },
+      plugins: [react()],
+      define: {
+        'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
+        'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY)
+      },
+      resolve: {
+        alias: {
+          '@': path.resolve(__dirname, '.'),
+        }
+      }
+    };
+});
+
+
+/* --- Bundled from index.tsx --- */
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+
+
+const rootElement = document.getElementById('root');
+if (!rootElement) {
+  throw new Error("Could not find root element to mount to");
+}
+
+const root = ReactDOM.createRoot(rootElement);
+root.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
+
+
+    </script>
+    <script>
+      window.addEventListener('load', function() {
+        if (window.Babel) {
+          window.Babel.transformScriptTags();
+        }
+      });
+    </script>
+    
 </body>
 </html>
