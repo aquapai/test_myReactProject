@@ -3,15 +3,15 @@
   "version": "0.0.0",
   "private": false,
   "type": "module",
-  "homepage": "https://insertnamehere0002.github.io/test_myReactProject/",
+  "homepage": "https://aquapai.github.io/test_myReactProject/",
   "scripts": {
     "generate-sites": "node scripts/generate-public-manifest.cjs",
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "predeploy": "npm run build",      
-    "deploy": "gh-pages -d dist"       
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "react": "^19.2.0",

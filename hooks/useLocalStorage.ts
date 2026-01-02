@@ -14,9 +14,7 @@ export function useLocalStorage<T,>(key: string, initialValue: T): [T, React.Dis
 
   useEffect(() => {
     try {
-      const valueToStore = typeof storedValue === 'function' 
-        ? storedValue(storedValue) 
-        : storedValue;
+      const valueToStore = storedValue;
       window.localStorage.setItem(key, JSON.stringify(valueToStore));
     } catch (error) {
       console.error(error);
