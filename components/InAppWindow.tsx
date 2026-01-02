@@ -11,7 +11,7 @@ const InAppWindow: React.FC<InAppWindowProps> = ({ url, onClose }) => {
   // Build candidate path (root-relative -> include index.html)
   let iframeSrcCandidate = url;
   try {
-    if (iframeSrcCandidate.startsWith('/')) {
+    if (iframeSrcCandidate.startsWith('/') && !iframeSrcCandidate.startsWith(base)) {
       const trimmed = iframeSrcCandidate.replace(/^\/+/, '').replace(/\/+$/, '');
       const hasHtml = /\.html?$/.test(iframeSrcCandidate);
       const pathPart = hasHtml ? trimmed : `${trimmed}/index.html`;
@@ -29,123 +29,11 @@ const InAppWindow: React.FC<InAppWindowProps> = ({ url, onClose }) => {
   const lastKeyRef = useRef<string>('');
   const prevBlobRef = useRef<string | null>(null);
 
-  // Directly use the built index.html path first. This avoids Blob-relative asset path issues.
+  // Directly use the url.
   useEffect(() => {
-    let cancelled = false;
-    let createdBlob: string | null = null;
-    const key = `${iframeSrcCandidate}|${attempt}`;
-    // avoid re-running the expensive fetch/rewrite if we've already applied this key
-    if (lastKeyRef.current === key) return;
-
-    async function fetchAndRewrite() {
-      setLoaded(false);
-      setError(null);
-
-      try {
-        const res = await fetch(iframeSrcCandidate, { cache: 'no-store' });
-        if (!res.ok) throw new Error(`fetch ${iframeSrcCandidate} status ${res.status}`);
-        const html = await res.text();
-
-        if (cancelled) return;
-
-        // Compute site base (strip trailing /index.html)
-        const siteBase = iframeSrcCandidate.replace(/\/index\.html$/i, '').replace(/\/$/, '');
-
-        // Replace root-absolute references (src="/..." or href="/....") with either
-        // - siteBase + /... if that file exists under the site's __built__ folder
-        // - otherwise leave the original /... so global assets (like /index.css) still resolve
-        const attrRegex = /(src|href)=\s*(["'])\/([^\"']+)/gi;
-        const matches = Array.from(html.matchAll(attrRegex));
-        let rewritten = html;
-
-        // Helper to escape a string for RegExp
-        const escapeRegExp = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-
-        for (const m of matches) {
-          const attr = m[1];
-          const quote = m[2];
-          const path = m[3];
-          const original = `${attr}=${quote}/${path}`;
-          const siteCandidate = `${siteBase}/${path}`;
-          try {
-            // check whether the asset exists under siteCandidate (same origin)
-            // Note: we await here to ensure sequential checks and reduce load.
-            // eslint-disable-next-line no-await-in-loop
-            let probe = await fetch(siteCandidate, { method: 'GET', cache: 'no-store' });
-            if (probe.ok) {
-              const re = new RegExp(escapeRegExp(original), 'g');
-              rewritten = rewritten.replace(re, `${attr}=${quote}${siteCandidate}`);
-            } else {
-              // try the common local static server at :8000 (used for diagnostics/build serving)
-              const alt = `http://localhost:8000${siteCandidate}`;
-              try {
-                // eslint-disable-next-line no-await-in-loop
-                const probe2 = await fetch(alt, { method: 'GET', cache: 'no-store' });
-                if (probe2.ok) {
-                  const re = new RegExp(escapeRegExp(original), 'g');
-                  rewritten = rewritten.replace(re, `${attr}=${quote}${alt}`);
-                }
-              } catch (e2) {
-                console.warn('[InAppWindow] alt probe failed for', alt, e2);
-              }
-            }
-          } catch (e) {
-            // If probe fails, be conservative and leave original path
-            console.warn('[InAppWindow] probe failed for', siteCandidate, e);
-          }
-        }
-
-        // Create blob URL and use it as iframe src so relative references resolved against absolute URLs we rewrote above
-        const blob = new Blob([rewritten], { type: 'text/html' });
-        createdBlob = URL.createObjectURL(blob);
-        // revoke previous blob if present
-        if (prevBlobRef.current) {
-          try { URL.revokeObjectURL(prevBlobRef.current); } catch (e) { /* ignore */ }
-        }
-        prevBlobRef.current = createdBlob;
-        lastKeyRef.current = key;
-        setIframeSrc(createdBlob);
-        return;
-      } catch (err) {
-        console.warn('[InAppWindow] fetch/rewrite failed, falling back to direct src', err);
-        // fallback to direct src so browser loads assets from server paths
-          if (!cancelled) {
-          lastKeyRef.current = key;
-          setIframeSrc(iframeSrcCandidate);
-          setError('빌드된 파일을 리라이트하지 못했습니다. 직접 경로로 로드합니다.');
-        }
-      }
-    }
-
-    fetchAndRewrite();
-
-    const t = setTimeout(() => {
-      if (!createdBlob) {
-        setError('로드가 지연되고 있습니다. 서버가 실행중인지 확인하거나 새 탭으로 열어보세요.');
-        // Try to auto-open the URL in a new tab as a fallback. May be blocked by popup blockers.
-        try {
-          if (!autoOpened) {
-            const target = iframeSrc ?? iframeSrcCandidate;
-            if (target) {
-              window.open(target, '_blank', 'noopener');
-              setAutoOpened(true);
-              console.log('[InAppWindow] auto-opened fallback URL in new tab:', target);
-            }
-          }
-        } catch (e) {
-          console.warn('[InAppWindow] auto-open failed', e);
-        }
-      }
-    }, 8000);
-
-    return () => {
-      cancelled = true;
-      clearTimeout(t);
-      if (createdBlob) {
-        try { URL.revokeObjectURL(createdBlob); } catch (e) { /* ignore */ }
-      }
-    };
-  }, [iframeSrcCandidate, attempt]);
+    setIframeSrc(iframeSrcCandidate);
+    setLoaded(true);
+  }, [iframeSrcCandidate]);
 
   // helper: copy URL to clipboard
   const copyUrl = async () => {
@@ -188,7 +76,7 @@ const InAppWindow: React.FC<InAppWindowProps> = ({ url, onClose }) => {
             </div>
             <div style={{ marginTop: '0.75rem' }}>
               <button
-                  onClick={() => window.open(iframeSrc ?? iframeSrcCandidate, '_blank', 'noopener')}
+                onClick={() => window.open(iframeSrc ?? iframeSrcCandidate, '_blank', 'noopener')}
                 style={{ background: '#4f46e5', color: '#fff', border: 'none', padding: '0.5rem 0.75rem', borderRadius: 6 }}
               >
                 새 탭으로 열기

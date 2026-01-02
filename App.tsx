@@ -10,36 +10,7 @@ import './index.css';
 
 const App: React.FC = () => {
   const categories = ['게임', '음악', '미술'];
-  const [websites, setWebsites] = useLocalStorage<Website[]>('my-websites', [
-    {
-      id: '1',
-      name: 'ArtStation',
-      url: 'https://www.artstation.com/',
-      imageUrl: 'https://picsum.photos/seed/1/600/400',
-      category: '미술',
-    },
-    {
-      id: '2',
-      name: 'Spotify',
-      url: 'https://open.spotify.com/',
-      imageUrl: 'https://picsum.photos/seed/2/600/400',
-      category: '음악',
-    },
-    {
-      id: '3',
-      name: 'Steam',
-      url: 'https://store.steampowered.com/',
-      imageUrl: 'https://picsum.photos/seed/3/600/400',
-      category: '게임',
-    },
-    {
-      id: '4',
-      name: 'Behance',
-      url: 'https://www.behance.net/',
-      imageUrl: 'https://picsum.photos/seed/4/600/400',
-      category: '미술',
-    }
-  ]);
+  const [websites, setWebsites] = useLocalStorage<Website[]>('my-websites', []);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentCategory, setCurrentCategory] = useState('All');
   const [inAppWindowUrl, setInAppWindowUrl] = useState<string | null>(null);
@@ -65,7 +36,19 @@ const App: React.FC = () => {
       .then((sites: Website[]) => {
         if (cancelled) return;
         // Always prefer the generated manifest from public/sites.json and replace stored websites.
-        setWebsites(() => sites);
+        const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, ''); // Remove trailing slash
+        const processedSites = sites.map(site => ({
+          ...site,
+          // If url starts with / and doesn't explicitly start with base, prepend it
+          url: site.url.startsWith('/') && !site.url.startsWith(baseUrl)
+            ? `${baseUrl}${site.url}`
+            : site.url,
+          // Do the same for imageUrl
+          imageUrl: site.imageUrl.startsWith('/') && !site.imageUrl.startsWith(baseUrl)
+            ? `${baseUrl}${site.imageUrl}`
+            : site.imageUrl
+        }));
+        setWebsites(() => processedSites);
       })
       .catch(err => {
         // Log manifest load errors to help debugging (network/path/base issues)
