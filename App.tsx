@@ -95,8 +95,8 @@ const App: React.FC = () => {
     currentCategory === 'All' || website.category === currentCategory
   );
 
-    return (
-    <div className="app-container">
+  return (
+    <div className="app-container" style={{ minHeight: '100vh', backgroundColor: '#0f172a', color: 'white' }}>
       <AddWebsiteModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -132,9 +132,8 @@ const App: React.FC = () => {
               <li key={category} className="category-list-item">
                 <button
                   onClick={() => setCurrentCategory(category)}
-                  className={`category-button ${
-                    currentCategory === category ? 'active' : ''
-                  }`}
+                  className={`category-button ${currentCategory === category ? 'active' : ''
+                    }`}
                 >
                   {category === 'All' ? '전체' : category}
                 </button>
@@ -182,6 +181,10 @@ const App: React.FC = () => {
       {inAppWindowUrl && (
         <InAppWindow url={inAppWindowUrl} onClose={closeInAppWindow} />
       )}
+      <div style={{ position: 'fixed', bottom: 10, right: 10, background: 'rgba(0,0,0,0.8)', color: 'lime', padding: 10, borderRadius: 5, fontSize: 12, zIndex: 9999 }}>
+        Items: {websites ? websites.length : 'null'} <br />
+        Cat: {currentCategory}
+      </div>
     </div>
   );
 };
