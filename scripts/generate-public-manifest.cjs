@@ -100,8 +100,18 @@ function buildSites() {
         html = html.replace(/(href|src)=("|')\//g, `$1=$2./`);
 
         // Inject Babel standalone for in-browser compilation of TSX/JSX
+        // AND Inject API Key for AI features (Exam/Demo only - exposes key)
         if (html.includes('<head>')) {
-          html = html.replace('<head>', '<head>\n    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>');
+          const injection = `
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script>
+      window.process = {
+        env: {
+          API_KEY: "AIzaSyDr73mB7NaPI0oIL-xG5mcRM3Clv12hTxQ"
+        }
+      };
+    </script>`;
+          html = html.replace('<head>', '<head>\n' + injection);
         }
 
         // Convert module scripts to text/babel for Babel to process
