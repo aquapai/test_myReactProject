@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>포폴 업데이트 - 후광 효과 포트폴리오</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@200;300;400;500;600;700;900&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              background: '#F8FAFC', // Very light blue-grey
+              surface: '#FFFFFF',
+              primary: '#93C5FD', // Pastel Blue
+              secondary: '#C4B5FD', // Soft Purple
+              accent: '#818CF8', // Indigo
+              pastel: {
+                50: '#F0F9FF',
+                100: '#E0F2FE',
+                200: '#BAE6FD',
+                300: '#7DD3FC',
+                400: '#38BDF8',
+                blue: '#A5D8FF',
+                purple: '#D8D4FE',
+                pink: '#FAD4E4',
+              }
+            },
+            fontFamily: {
+              sans: ['"Plus Jakarta Sans"', '"Pretendard"', 'sans-serif'],
+              serif: ['"Noto Serif KR"', '"Playfair Display"', 'serif'],
+            },
+            animation: {
+              'fade-in': 'fadeIn 1.5s ease-out forwards',
+              'fade-out': 'fadeOut 1s ease-in forwards',
+              'slide-up': 'slideUp 1s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+              'pulse-slow': 'pulse 5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+              'float': 'float 6s ease-in-out infinite',
+              'halo-expand': 'haloExpand 3s ease-in-out forwards',
+              'breathing': 'breathing 4s ease-in-out infinite',
+            },
+            keyframes: {
+              fadeIn: {
+                '0%': { opacity: '0' },
+                '100%': { opacity: '1' },
+              },
+              fadeOut: {
+                '0%': { opacity: '1' },
+                '100%': { opacity: '0' },
+              },
+              slideUp: {
+                '0%': { transform: 'translateY(30px)', opacity: '0' },
+                '100%': { transform: 'translateY(0)', opacity: '1' },
+              },
+              float: {
+                '0%, 100%': { transform: 'translateY(0)' },
+                '50%': { transform: 'translateY(-15px)' },
+              },
+              haloExpand: {
+                '0%': { transform: 'scale(0.8)', opacity: '0' },
+                '50%': { opacity: '0.6' },
+                '100%': { transform: 'scale(1.2)', opacity: '0' },
+              },
+              breathing: {
+                 '0%, 100%': { transform: 'scale(1)', opacity: '0.3' },
+                 '50%': { transform: 'scale(1.1)', opacity: '0.5' },
+              }
+            }
+          },
+        },
+      }
+    </script>
+    <style>
+      body {
+        background-color: #F8FAFC;
+        color: #334155;
+        overflow-x: hidden;
+        word-break: keep-all; /* Korean word break style */
+      }
+      
+      /* Light Mode Glassmorphism */
+      .glass {
+        background: rgba(255, 255, 255, 0.4);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.6);
+      }
+      
+      .glass-card {
+        background: rgba(255, 255, 255, 0.65);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.8);
+        box-shadow: 0 20px 40px -10px rgba(148, 163, 184, 0.15);
+      }
+      
+      .glass-card-hover {
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      .glass-card-hover:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 30px 60px -15px rgba(148, 163, 184, 0.25);
+        background: rgba(255, 255, 255, 0.85);
+      }
+
+      .text-glow {
+        text-shadow: 0 0 30px rgba(165, 216, 255, 0.6);
+      }
+      
+      /* Custom Scrollbar */
+      ::-webkit-scrollbar {
+        width: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #F1F5F9;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #CBD5E1;
+        border-radius: 3px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #94A3B8;
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react/": "https://aistudiocdn.com/react@^19.2.1/",
+    "react": "https://aistudiocdn.com/react@^19.2.1",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.1/",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.31.0",
+    "recharts": "https://aistudiocdn.com/recharts@^3.5.1",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.469.0"
+  }
+}
+</script>
+<link rel="stylesheet" href="./index.css">
+</head>
+  <body>
+    <div id="root"></div>
+  <script type="text/babel" data-type="module" src="./index.tsx" data-presets="react,typescript"></script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+{
+  "name": "WordFlow",
+  "description": "수능/토플 대비 고효율 영단어 암기 앱. 인지심리학 기반의 청크 학습과 자동화된 반복 시스템을 제공합니다.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
