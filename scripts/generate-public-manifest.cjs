@@ -17,41 +17,70 @@ function hasIndexHtml(p) {
   return fs.existsSync(path.join(p, 'index.html')) || fs.existsSync(path.join(p, 'index.htm'));
 }
 
-function fixImports(dir) {
+// Recursively find all .ts/.tsx files
+function getAllFiles(dir, fileList = []) {
   const files = fs.readdirSync(dir);
   for (const file of files) {
-    const fullPath = path.join(dir, file);
-    if (fs.statSync(fullPath).isDirectory()) {
-      fixImports(fullPath);
-      continue;
-    }
-
-    if (file.endsWith('.tsx') || file.endsWith('.ts')) {
-      let content = fs.readFileSync(fullPath, 'utf8');
-      let changed = false;
-      // Replace import ... from './Name' with './Name.tsx' if file exists
-      content = content.replace(/from\s+['"]\.\/([^'"]+)['"]/g, (match, importPath) => {
-        // If it already has extension, ignore
-        if (importPath.endsWith('.tsx') || importPath.endsWith('.ts') || importPath.endsWith('.js')) return match;
-
-        // Check if .tsx exists
-        if (fs.existsSync(path.join(dir, `${importPath}.tsx`))) {
-          changed = true;
-          return `from './${importPath}.tsx'`;
-        }
-        if (fs.existsSync(path.join(dir, `${importPath}.ts`))) {
-          changed = true;
-          return `from './${importPath}.ts'`;
-        }
-        return match;
-      });
-
-      if (changed) {
-        fs.writeFileSync(fullPath, content, 'utf8');
-        console.log('Fixed imports in', fullPath);
+    const filePath = path.join(dir, file);
+    if (fs.statSync(filePath).isDirectory()) {
+      getAllFiles(filePath, fileList);
+    } else {
+      if (file.endsWith('.ts') || file.endsWith('.tsx')) {
+        fileList.push(filePath);
       }
     }
   }
+  return fileList;
+}
+
+// Bundle all local files into one script content
+function bundleFiles(dir) {
+  const files = getAllFiles(dir);
+
+  // Sort files: components first, then App, then index
+  // Heuristic: 
+  // 1. Files in subdirectories (likely components/utils)
+  // 2. App.tsx
+  // 3. index.tsx
+  files.sort((a, b) => {
+    const aBase = path.basename(a);
+    const bBase = path.basename(b);
+    const aIsRoot = path.dirname(a) === dir;
+    const bIsRoot = path.dirname(b) === dir;
+
+    if (!aIsRoot && bIsRoot) return -1;
+    if (aIsRoot && !bIsRoot) return 1;
+
+    if (aBase === 'App.tsx' || aBase === 'App.ts') return -1; // App before index
+    if (bBase === 'App.tsx' || bBase === 'App.ts') return 1;
+
+    if (aBase.startsWith('index.')) return 1; // index always last
+    if (bBase.startsWith('index.')) return -1;
+
+    return a.localeCompare(b);
+  });
+
+  let bundle = '';
+
+  for (const file of files) {
+    let content = fs.readFileSync(file, 'utf8');
+
+    // STRIP LOCAL IMPORTS: import ... from './...'
+    // Regex matches: import [anything] from ['. or "]./[anything][' or "]
+    content = content.replace(/import\s+.*?from\s+['"]\..*?['"];?/g, '');
+
+    // STRIP EXPORTS: export default, export const -> const
+    content = content.replace(/export\s+default\s+/g, '');
+    content = content.replace(/export\s+const\s+/g, 'const ');
+    content = content.replace(/export\s+function\s+/g, 'function ');
+    content = content.replace(/export\s+class\s+/g, 'class ');
+
+    bundle += `\n/* --- Bundled from ${path.basename(file)} --- */\n`;
+    bundle += content;
+    bundle += '\n';
+  }
+
+  return bundle;
 }
 
 function buildSites() {
@@ -74,7 +103,7 @@ function buildSites() {
     const displayName = name.replace(/[-_]/g, ' ');
     const url = `/${name}/index.wrapped.html`;
 
-    // choose image: prefer public/<name>/thumbnail.png or favicon.png, otherwise placeholder
+    // choose image
     let imageUrl = `/placeholder-site.png`;
     const thumbCandidates = ['thumbnail.png', 'thumbnail.jpg', 'favicon.png', 'favicon.ico'];
     for (const c of thumbCandidates) {
@@ -84,45 +113,62 @@ function buildSites() {
       }
     }
 
-    // Fix imports in .tsx files (add .tsx extension if missing) to allow browser resolution
-    try {
-      fixImports(dirPath);
-    } catch (e) {
-      console.warn('Failed to fix imports in', dirPath, e);
-    }
-
-    // Create a wrapped index that rewrites root-relative asset paths to folder-relative
     try {
       const indexPath = path.join(dirPath, 'index.html');
       if (fs.existsSync(indexPath)) {
         let html = fs.readFileSync(indexPath, 'utf8');
-        // Replace src="/... or href="/... (root-relative) with relative versions
+
+        // Fix asset paths
         html = html.replace(/(href|src)=("|')\//g, `$1=$2./`);
 
-        // Inject Babel standalone for in-browser compilation of TSX/JSX
-        // AND Inject API Key for AI features (Exam/Demo only - exposes key)
-        if (html.includes('<head>')) {
-          const injection = `
+        // Remove existing scripts to avoid conflicts
+        html = html.replace(/<script type="importmap">[\s\S]*?<\/script>/gi, '');
+        html = html.replace(/<script.*?src=["'].*?["'].*?>\s*<\/script>/gi, ''); // remove external scripts
+        html = html.replace(/<script type="module">[\s\S]*?<\/script>/gi, ''); // remove module blocks
+
+        // Generate Bundle
+        const bundledCode = bundleFiles(dirPath);
+
+        const injection = `
+     <!-- Injected by Generator -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script>
-      window.process = {
-        env: {
-          API_KEY: "AIzaSyDr73mB7NaPI0oIL-xG5mcRM3Clv12hTxQ"
+      window.process = { env: { API_KEY: "AIzaSyDr73mB7NaPI0oIL-xG5mcRM3Clv12hTxQ" } };
+    </script>
+    <script type="importmap">
+      {
+        "imports": {
+          "react": "https://esm.sh/react@18.2.0",
+          "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+          "lucide-react": "https://esm.sh/lucide-react@0.263.1",
+          "@google/genai": "https://esm.sh/@google/genai@0.1.1",
+          "recharts": "https://esm.sh/recharts@2.12.0"
         }
-      };
-    </script>`;
-          html = html.replace('<head>', '<head>\n' + injection);
+      }
+    </script>
+    <script type="text/babel" data-type="module" data-presets="react,typescript">
+      ${bundledCode}
+    </script>
+    <script>
+      window.addEventListener('load', function() {
+        if (window.Babel) {
+          window.Babel.transformScriptTags();
         }
+      });
+    </script>
+    `;
 
-        // Convert module scripts to text/babel for Babel to process
-        // Also add data-presets for react and typescript
-        html = html.replace(/<script type="module" src="([^"]+)"/g, '<script type="text/babel" data-type="module" src="$1" data-presets="react,typescript"');
+        if (html.includes('</body>')) {
+          html = html.replace('</body>', injection + '\n</body>');
+        } else {
+          html += injection;
+        }
 
         const wrappedPath = path.join(dirPath, 'index.wrapped.html');
         fs.writeFileSync(wrappedPath, html, 'utf8');
       }
     } catch (e) {
-      // ignore wrap errors
+      console.error('Error generating wrapped html for', name, e);
     }
 
     sites.push({

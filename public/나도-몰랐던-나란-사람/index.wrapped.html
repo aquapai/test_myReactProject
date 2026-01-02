@@ -1,19 +1,10 @@
 <!DOCTYPE html>
 <html lang="ko">
   <head>
-
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script>
-      window.process = {
-        env: {
-          API_KEY: "AIzaSyDr73mB7NaPI0oIL-xG5mcRM3Clv12hTxQ"
-        }
-      };
-    </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>나도 몰랐던 나란 사람</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    
     <style>
       @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;600;700&display=swap');
       body {
@@ -28,20 +19,856 @@
         scrollbar-width: none;
       }
     </style>
-  <script type="importmap">
-{
-  "imports": {
-    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.31.0",
-    "react/": "https://aistudiocdn.com/react@^19.2.1/",
-    "react": "https://aistudiocdn.com/react@^19.2.1",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.1/"
-  }
-}
-</script>
+  
 <link rel="stylesheet" href="./index.css">
 </head>
   <body class="bg-gray-50 text-gray-800">
     <div id="root"></div>
-    <script type="text/babel" data-type="module" src="./index.tsx" data-presets="react,typescript"></script>
-  </body>
+    
+  
+     <!-- Injected by Generator -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script>
+      window.process = { env: { API_KEY: "AIzaSyDr73mB7NaPI0oIL-xG5mcRM3Clv12hTxQ" } };
+    </script>
+    <script type="importmap">
+      {
+        "imports": {
+          "react": "https://esm.sh/react@18.2.0",
+          "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+          "lucide-react": "https://esm.sh/lucide-react@0.263.1",
+          "@google/genai": "https://esm.sh/@google/genai@0.1.1",
+          "recharts": "https://esm.sh/recharts@2.12.0"
+        }
+      }
+    </script>
+    <script type="text/babel" data-type="module" data-presets="react,typescript">
+      
+/* --- Bundled from AnalysisView.tsx --- */
+import React from 'react';
+
+
+
+interface AnalysisViewProps {
+  experiences: Experience[];
+  isLoading: boolean;
+  onNext: () => void;
+  onBack: () => void;
+}
+
+const AnalysisView: React.FC<AnalysisViewProps> = ({ experiences, isLoading, onNext, onBack }) => {
+  return (
+    <div className="flex flex-col h-full space-y-4">
+      <div className="flex items-center justify-between">
+        <button onClick={() => { audioService.playClick(); onBack(); }} className="text-gray-500 hover:text-gray-800 text-sm font-medium">
+          &larr; 뒤로가기
+        </button>
+        <h2 className="text-xl font-bold text-gray-800">나의 숨겨진 경력 카드</h2>
+        <div className="w-16"></div> {/* Spacer */}
+      </div>
+
+      <div className="flex-1 overflow-y-auto no-scrollbar space-y-4 pb-20">
+        {isLoading ? (
+          <div className="text-center mt-20 space-y-4">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
+            <p className="text-gray-500">대화 내용을 분석하여 경력을 정리 중입니다...</p>
+            <p className="text-xs text-gray-400">AI가 당신의 강점을 찾고 있어요!</p>
+          </div>
+        ) : experiences.length === 0 ? (
+          <div className="text-center mt-20 text-gray-500">
+            <p>분석된 경력이 없습니다.</p>
+            <p className="text-sm">대화를 조금 더 나누어 볼까요?</p>
+          </div>
+        ) : (
+          experiences.map((exp, idx) => (
+            <div 
+              key={exp.id} 
+              className="bg-white rounded-xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300 transform hover:-translate-y-1"
+              style={{ animationDelay: `${idx * 100}ms` }}
+            >
+              <div className="flex justify-between items-start mb-3">
+                <h3 className="font-bold text-lg text-indigo-700">{exp.title}</h3>
+                <span className="bg-indigo-50 text-indigo-600 text-xs px-2 py-1 rounded-md font-semibold">STAR 완료</span>
+              </div>
+              
+              <div className="space-y-3 text-sm text-gray-600">
+                <div className="flex gap-2">
+                  <span className="font-bold min-w-[30px] text-gray-400">S</span>
+                  <p className="bg-gray-50 p-2 rounded flex-1">{exp.situation}</p>
+                </div>
+                <div className="flex gap-2">
+                  <span className="font-bold min-w-[30px] text-gray-400">T</span>
+                  <p className="bg-gray-50 p-2 rounded flex-1">{exp.task}</p>
+                </div>
+                <div className="flex gap-2">
+                  <span className="font-bold min-w-[30px] text-gray-400">A</span>
+                  <p className="bg-gray-50 p-2 rounded flex-1">{exp.action}</p>
+                </div>
+                <div className="flex gap-2">
+                  <span className="font-bold min-w-[30px] text-indigo-500">R</span>
+                  <p className="bg-indigo-50 p-2 rounded flex-1 font-medium text-gray-800">{exp.result}</p>
+                </div>
+              </div>
+
+              <div className="mt-4 flex flex-wrap gap-2">
+                {exp.tags.map((tag, i) => (
+                  <span key={i} className="text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded-full">#{tag}</span>
+                ))}
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      {!isLoading && experiences.length > 0 && (
+        <div className="sticky bottom-0 bg-gradient-to-t from-gray-50 to-transparent pt-4 pb-2">
+            <button
+            onClick={() => { audioService.playClick(); onNext(); }}
+            className="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold shadow-lg hover:bg-indigo-700 transition active:scale-95 flex items-center justify-center gap-2"
+            >
+            <span>이 경험을 보완할 활동 추천받기</span>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+            </svg>
+            </button>
+        </div>
+      )}
+    </div>
+  );
+};
+
+AnalysisView;
+
+/* --- Bundled from ChatInterface.tsx --- */
+import React, { useEffect, useRef, useState } from 'react';
+
+
+
+
+interface ChatInterfaceProps {
+  history: Message[];
+  setHistory: React.Dispatch<React.SetStateAction<Message[]>>;
+  onAnalyze: () => void;
+}
+
+const ChatInterface: React.FC<ChatInterfaceProps> = ({ history, setHistory, onAnalyze }) => {
+  const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // 자동 스크롤
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [history]);
+
+  const handleSend = async () => {
+    if (!input.trim() || isLoading) return;
+
+    audioService.playClick();
+    const userMsg: Message = {
+      id: Date.now().toString(),
+      role: 'user',
+      text: input,
+      timestamp: new Date(),
+    };
+
+    setHistory(prev => [...prev, userMsg]);
+    setInput('');
+    setIsLoading(true);
+
+    try {
+      const responseText = await sendChatMessage(history, input);
+      const aiMsg: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'model',
+        text: responseText,
+        timestamp: new Date(),
+      };
+      setHistory(prev => [...prev, aiMsg]);
+      audioService.playSuccess(); // AI 응답 시 긍정적 피드백
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
+  return (
+    <div className="flex flex-col h-full bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+      {/* 헤더 */}
+      <div className="bg-indigo-600 p-4 text-white flex justify-between items-center">
+        <div>
+          <h2 className="font-bold text-lg">경험 발굴 인터뷰</h2>
+          <p className="text-xs text-indigo-100 opacity-80">사소한 이야기도 편하게 해주세요.</p>
+        </div>
+        {history.length > 2 && (
+          <button 
+            onClick={() => { audioService.playClick(); onAnalyze(); }}
+            className="bg-white text-indigo-600 px-3 py-1.5 rounded-full text-xs font-bold hover:bg-indigo-50 transition shadow-md animate-pulse"
+          >
+            분석하러 가기 &rarr;
+          </button>
+        )}
+      </div>
+
+      {/* 채팅 영역 */}
+      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50 no-scrollbar">
+        {history.length === 0 && (
+          <div className="text-center text-gray-400 mt-10 text-sm">
+            <p>👋 안녕하세요!</p>
+            <p>최근에 가장 즐겁게 했던 일은 무엇인가요?</p>
+          </div>
+        )}
+        {history.map((msg) => (
+          <div
+            key={msg.id}
+            className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+          >
+            <div
+              className={`max-w-[80%] p-3 rounded-2xl text-sm leading-relaxed shadow-sm ${
+                msg.role === 'user'
+                  ? 'bg-indigo-500 text-white rounded-tr-none'
+                  : 'bg-white text-gray-800 border border-gray-200 rounded-tl-none'
+              }`}
+            >
+              {msg.text}
+            </div>
+          </div>
+        ))}
+        {isLoading && (
+          <div className="flex justify-start">
+            <div className="bg-white p-3 rounded-2xl rounded-tl-none border border-gray-200 shadow-sm">
+              <div className="flex space-x-1">
+                <div className="w-2 h-2 bg-gray-300 rounded-full animate-bounce"></div>
+                <div className="w-2 h-2 bg-gray-300 rounded-full animate-bounce delay-75"></div>
+                <div className="w-2 h-2 bg-gray-300 rounded-full animate-bounce delay-150"></div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* 입력 영역 */}
+      <div className="p-3 bg-white border-t border-gray-100">
+        <div className="flex items-center space-x-2">
+          <input
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="예: 편의점 알바할 때 진상 손님을 달랜 적이 있어요..."
+            className="flex-1 border border-gray-200 rounded-full px-4 py-3 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition text-sm"
+          />
+          <button
+            onClick={handleSend}
+            disabled={!input.trim() || isLoading}
+            className="bg-indigo-600 text-white p-3 rounded-full hover:bg-indigo-700 disabled:bg-gray-300 transition shadow-md"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+ChatInterface;
+
+/* --- Bundled from RecommendationView.tsx --- */
+import React from 'react';
+
+
+
+interface RecommendationViewProps {
+  activities: Activity[];
+  isLoading: boolean;
+  onReset: () => void;
+  onBack: () => void;
+}
+
+const RecommendationView: React.FC<RecommendationViewProps> = ({ activities, isLoading, onReset, onBack }) => {
+  return (
+    <div className="flex flex-col h-full space-y-4">
+      <div className="flex items-center justify-between">
+         <button onClick={() => { audioService.playClick(); onBack(); }} className="text-gray-500 hover:text-gray-800 text-sm font-medium">
+          &larr; 뒤로가기
+        </button>
+        <h2 className="text-xl font-bold text-gray-800">단기 성장 부스터 🚀</h2>
+        <div className="w-16"></div>
+      </div>
+
+      <div className="flex-1 overflow-y-auto no-scrollbar space-y-4 pb-20">
+        {isLoading ? (
+          <div className="text-center mt-20 space-y-4">
+            <div className="animate-pulse flex justify-center space-x-2">
+                <div className="h-4 w-4 bg-yellow-400 rounded-full"></div>
+                <div className="h-4 w-4 bg-yellow-400 rounded-full"></div>
+                <div className="h-4 w-4 bg-yellow-400 rounded-full"></div>
+            </div>
+            <p className="text-gray-500">당신의 성장을 위한 맞춤형 활동을 찾고 있습니다...</p>
+          </div>
+        ) : activities.length === 0 ? (
+          <div className="text-center mt-20 text-gray-500">추천할 활동을 불러오지 못했습니다.</div>
+        ) : (
+          activities.map((act, idx) => (
+            <div 
+              key={act.id}
+              className="bg-white rounded-xl p-5 shadow-sm border border-gray-100 relative overflow-hidden group hover:shadow-lg transition-all"
+            >
+              {/* Decorative accent */}
+              <div className={`absolute left-0 top-0 bottom-0 w-1.5 ${
+                act.type === 'Lecture' ? 'bg-blue-400' :
+                act.type === 'Campaign' ? 'bg-green-400' : 'bg-orange-400'
+              }`}></div>
+
+              <div className="flex justify-between items-start mb-2 pl-2">
+                <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded ${
+                   act.type === 'Lecture' ? 'bg-blue-50 text-blue-600' :
+                   act.type === 'Campaign' ? 'bg-green-50 text-green-600' : 'bg-orange-50 text-orange-600'
+                }`}>
+                  {act.type === 'Lecture' ? '온라인 강의' : act.type === 'Campaign' ? '캠페인 참여' : '단기 봉사'}
+                </span>
+                <span className="text-xs font-semibold text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
+                  ⏱️ {act.duration}
+                </span>
+              </div>
+
+              <h3 className="font-bold text-lg text-gray-800 mb-2 pl-2">{act.title}</h3>
+              <p className="text-sm text-gray-600 mb-4 pl-2 leading-relaxed">{act.description}</p>
+              
+              <div className="bg-gray-50 p-3 rounded-lg ml-2">
+                <p className="text-xs font-bold text-gray-500 mb-1">🎁 이력서 활용 포인트</p>
+                <p className="text-sm text-indigo-600 font-medium">{act.benefit}</p>
+              </div>
+              
+              <button 
+                onClick={() => { audioService.playClick(); alert('실제 서비스에서는 해당 활동 페이지로 이동합니다!'); }}
+                className="mt-4 w-full border border-gray-200 text-gray-600 py-2 rounded-lg text-sm font-semibold hover:bg-gray-50 transition ml-1"
+              >
+                참여하러 가기
+              </button>
+            </div>
+          ))
+        )}
+      </div>
+        
+      {!isLoading && (
+        <div className="sticky bottom-0 bg-gradient-to-t from-gray-50 to-transparent pt-4 pb-2">
+            <button
+                onClick={() => { audioService.playClick(); onReset(); }}
+                className="w-full bg-white text-gray-500 border border-gray-300 py-3 rounded-xl font-bold hover:bg-gray-50 transition"
+            >
+                처음으로 돌아가기
+            </button>
+        </div>
+      )}
+    </div>
+  );
+};
+
+RecommendationView;
+
+/* --- Bundled from audioService.ts --- */
+// Web Audio API를 사용한 효과음 서비스
+// 별도의 mp3 파일 없이 코드로 소리를 생성합니다.
+
+class AudioService {
+  private audioContext: AudioContext | null = null;
+
+  constructor() {
+    // 브라우저 호환성을 위한 초기화
+    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+    if (AudioContextClass) {
+      this.audioContext = new AudioContextClass();
+    }
+  }
+
+  private ensureContext() {
+    if (this.audioContext && this.audioContext.state === 'suspended') {
+      this.audioContext.resume();
+    }
+    if (!this.audioContext) {
+        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+        if (AudioContextClass) {
+            this.audioContext = new AudioContextClass();
+        }
+    }
+  }
+
+  // 1. 긍정적인 알림음 (경험 발굴 성공 시)
+  playSuccess() {
+    this.ensureContext();
+    if (!this.audioContext) return;
+
+    const oscillator = this.audioContext.createOscillator();
+    const gainNode = this.audioContext.createGain();
+
+    oscillator.connect(gainNode);
+    gainNode.connect(this.audioContext.destination);
+
+    // 도-미-솔 느낌의 화음 아르페지오
+    const now = this.audioContext.currentTime;
+    
+    oscillator.type = 'sine';
+    oscillator.frequency.setValueAtTime(523.25, now); // C5
+    oscillator.frequency.exponentialRampToValueAtTime(659.25, now + 0.1); // E5
+    oscillator.frequency.exponentialRampToValueAtTime(783.99, now + 0.2); // G5
+
+    gainNode.gain.setValueAtTime(0.1, now);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+
+    oscillator.start(now);
+    oscillator.stop(now + 0.4);
+  }
+
+  // 2. 가벼운 클릭음 (메시지 전송 등)
+  playClick() {
+    this.ensureContext();
+    if (!this.audioContext) return;
+
+    const oscillator = this.audioContext.createOscillator();
+    const gainNode = this.audioContext.createGain();
+
+    oscillator.connect(gainNode);
+    gainNode.connect(this.audioContext.destination);
+
+    const now = this.audioContext.currentTime;
+    
+    oscillator.type = 'triangle';
+    oscillator.frequency.setValueAtTime(800, now);
+    gainNode.gain.setValueAtTime(0.05, now);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+
+    oscillator.start(now);
+    oscillator.stop(now + 0.1);
+  }
+
+  // 3. 페이지 전환음 (Shush 효과)
+  playTransition() {
+    this.ensureContext();
+    if (!this.audioContext) return;
+    
+    // White noise buffer logic could go here, but keeping it simple with oscillator
+    const oscillator = this.audioContext.createOscillator();
+    const gainNode = this.audioContext.createGain();
+
+    oscillator.connect(gainNode);
+    gainNode.connect(this.audioContext.destination);
+
+    const now = this.audioContext.currentTime;
+    oscillator.type = 'sine';
+    oscillator.frequency.setValueAtTime(200, now);
+    oscillator.frequency.linearRampToValueAtTime(400, now + 0.2);
+    
+    gainNode.gain.setValueAtTime(0.02, now);
+    gainNode.gain.linearRampToValueAtTime(0, now + 0.2);
+
+    oscillator.start(now);
+    oscillator.stop(now + 0.2);
+  }
+}
+
+const audioService = new AudioService();
+
+/* --- Bundled from geminiService.ts --- */
+import { GoogleGenAI, Type, Schema } from "@google/genai";
+
+
+// API 키가 없으면 에러 처리를 우아하게 하기 위한 안전장치
+const apiKey = process.env.API_KEY || '';
+
+// 인스턴스 생성 함수
+const getAI = () => new GoogleGenAI({ apiKey });
+
+// 1. 경험 발굴 채팅 시스템
+// 사용자의 사소한 이야기도 경력으로 연결될 수 있게 유도하는 페르소나
+const SYSTEM_INSTRUCTION_CHAT = `
+당신은 '나도 몰랐던 나란 사람' 서비스의 AI 커리어 상담사입니다. 
+주 사용자는 고등학생, 대학생, 취준생입니다.
+목표: 사용자가 "쓸 만한 경험이 없다"고 느낄 때, 대화를 통해 숨겨진 역량이나 경험을 찾아내세요.
+어조: 친절하고, 격려하며, 호기심이 많습니다. 질문은 한 번에 하나씩만 하세요.
+역할:
+1. 사용자의 일상적인 활동(알바, 동아리, 게임, 취미 등)에 대해 물어보세요.
+2. 그 활동에서 어떤 문제를 해결했는지, 어떤 역할을 했는지 구체적으로 파고드세요.
+3. 칭찬을 많이 해주세요. "와, 그건 정말 대단한 리더십인데요?" 같이 반응하세요.
+절대 이력서 양식을 직접 작성해주지 말고, 대화를 통해 '재료'를 모으는 데 집중하세요.
+`;
+
+const sendChatMessage = async (history: Message[], newMessage: string): Promise<string> => {
+  if (!apiKey) return "API 키가 설정되지 않았습니다.";
+  
+  try {
+    const ai = getAI();
+    // 이전 대화 내용을 컨텍스트로 변환
+    const chatHistory = history.map(msg => ({
+      role: msg.role,
+      parts: [{ text: msg.text }]
+    }));
+
+    const chat = ai.chats.create({
+      model: 'gemini-2.5-flash',
+      config: {
+        systemInstruction: SYSTEM_INSTRUCTION_CHAT,
+        thinkingConfig: { thinkingBudget: 0 } // 빠른 응답을 위해 thinking 끔
+      },
+      history: chatHistory
+    });
+
+    const result = await chat.sendMessage({ message: newMessage });
+    return result.text || "죄송해요, 잠시 생각이 엉켰어요. 다시 말씀해 주시겠어요?";
+  } catch (error) {
+    console.error("Chat Error:", error);
+    return "오류가 발생했습니다. 잠시 후 다시 시도해주세요.";
+  }
+};
+
+// 2. 경력 재해석 (Analysis)
+// 대화 기록을 바탕으로 STAR 기법으로 정리된 JSON 데이터 반환
+const EXPERIENCE_SCHEMA: Schema = {
+  type: Type.ARRAY,
+  items: {
+    type: Type.OBJECT,
+    properties: {
+      title: { type: Type.STRING, description: "경험의 한 줄 요약 제목" },
+      situation: { type: Type.STRING, description: "STAR 기법의 S: 상황" },
+      task: { type: Type.STRING, description: "STAR 기법의 T: 과제/목표" },
+      action: { type: Type.STRING, description: "STAR 기법의 A: 구체적 행동" },
+      result: { type: Type.STRING, description: "STAR 기법의 R: 결과/배운점" },
+      tags: { 
+        type: Type.ARRAY, 
+        items: { type: Type.STRING },
+        description: "관련 역량 태그 (예: 소통능력, 문제해결)" 
+      }
+    },
+    required: ["title", "situation", "task", "action", "result", "tags"]
+  }
+};
+
+const analyzeExperiences = async (history: Message[]): Promise<Experience[]> => {
+  if (!apiKey) throw new Error("API Key missing");
+
+  const conversationText = history.map(m => `${m.role}: ${m.text}`).join('\n');
+  const prompt = `
+    다음은 사용자와의 대화 내용입니다. 
+    이 대화에서 사용자가 가진 의미 있는 경험을 추출하여 이력서에 쓸 수 있는 STAR(Situation, Task, Action, Result) 기법으로 정리해주세요.
+    최소 2개 이상의 경험을 찾아주세요.
+    
+    대화 내용:
+    ${conversationText}
+  `;
+
+  try {
+    const ai = getAI();
+    const result = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: EXPERIENCE_SCHEMA,
+      }
+    });
+
+    const jsonText = result.text;
+    if (!jsonText) return [];
+    
+    const parsed = JSON.parse(jsonText);
+    // ID 생성
+    return parsed.map((item: any, index: number) => ({
+      ...item,
+      id: `exp-${Date.now()}-${index}`
+    }));
+
+  } catch (error) {
+    console.error("Analysis Error:", error);
+    return [];
+  }
+};
+
+// 3. 단기 성장 추천 (Recommendation)
+// 부족한 경험을 채울 수 있는 가상의 추천 활동 생성
+const RECOMMENDATION_SCHEMA: Schema = {
+  type: Type.ARRAY,
+  items: {
+    type: Type.OBJECT,
+    properties: {
+      title: { type: Type.STRING },
+      type: { type: Type.STRING, enum: ["Lecture", "Campaign", "Volunteering"] },
+      duration: { type: Type.STRING },
+      description: { type: Type.STRING },
+      benefit: { type: Type.STRING }
+    },
+    required: ["title", "type", "duration", "description", "benefit"]
+  }
+};
+
+const getRecommendations = async (experiences: Experience[]): Promise<Activity[]> => {
+  if (!apiKey) throw new Error("API Key missing");
+
+  const existingTags = experiences.flatMap(e => e.tags).join(", ");
+  const prompt = `
+    사용자는 현재 다음과 같은 역량/경험을 가지고 있습니다: [${existingTags}].
+    이 사용자에게 부족한 부분을 보완하거나 강점을 강화할 수 있는, 
+    2일에서 5일 이내에 완료 가능한 '구체적인' 단기 활동 3가지를 추천해주세요.
+    
+    활동 유형은 다음 중 하나여야 합니다:
+    1. Lecture: 온라인 단기 강의 (예: 3일 완성 마케팅 기초)
+    2. Campaign: 온라인 참여 캠페인 (예: 데이터 라벨링 참여, 오픈소스 기여)
+    3. Volunteering: 단기 봉사 (예: 번역 봉사)
+    
+    대한민국 환경에 맞는 실질적인 활동을 추천해주세요.
+  `;
+
+  try {
+    const ai = getAI();
+    const result = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: RECOMMENDATION_SCHEMA,
+      }
+    });
+
+    const jsonText = result.text;
+    if (!jsonText) return [];
+
+    const parsed = JSON.parse(jsonText);
+    return parsed.map((item: any, index: number) => ({
+      ...item,
+      id: `act-${Date.now()}-${index}`
+    }));
+  } catch (error) {
+    console.error("Recommendation Error:", error);
+    return [];
+  }
+};
+
+/* --- Bundled from App.tsx --- */
+import React, { useState } from 'react';
+
+
+
+
+
+
+
+const App: React.FC = () => {
+  const [view, setView] = useState<ViewState>('onboarding');
+  const [history, setHistory] = useState<Message[]>([]);
+  const [experiences, setExperiences] = useState<Experience[]>([]);
+  const [recommendations, setRecommendations] = useState<Activity[]>([]);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  // 뷰 전환 헬퍼 (소리 재생 포함)
+  const changeView = (newView: ViewState) => {
+    audioService.playTransition();
+    setView(newView);
+  };
+
+  // 1. 분석 시작 (Chat -> Analysis)
+  const handleAnalyze = async () => {
+    changeView('analysis');
+    setIsProcessing(true);
+    try {
+      const results = await analyzeExperiences(history);
+      setExperiences(results);
+      if (results.length > 0) audioService.playSuccess();
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  // 2. 추천 받기 (Analysis -> Recommendation)
+  const handleRecommend = async () => {
+    changeView('recommendation');
+    setIsProcessing(true);
+    try {
+      const results = await getRecommendations(experiences);
+      setRecommendations(results);
+      if (results.length > 0) audioService.playSuccess();
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  // 3. 리셋
+  const handleReset = () => {
+    setHistory([]);
+    setExperiences([]);
+    setRecommendations([]);
+    changeView('onboarding');
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+      <div className="w-full max-w-md bg-gray-50 h-[800px] max-h-[90vh] rounded-[2rem] shadow-2xl overflow-hidden border-4 border-white flex flex-col relative">
+        
+        {/* 온보딩 화면 */}
+        {view === 'onboarding' && (
+          <div className="flex-1 flex flex-col items-center justify-center p-8 bg-gradient-to-br from-indigo-500 to-purple-600 text-white text-center">
+            <div className="mb-6 animate-bounce">
+              <span className="text-6xl">🌱</span>
+            </div>
+            <h1 className="text-3xl font-bold mb-2">나도 몰랐던<br/>나란 사람</h1>
+            <p className="text-indigo-100 mb-10 text-sm opacity-90 leading-relaxed">
+              경험이 없어서 못 쓰는게 아니라<br/>
+              발견하지 못해서 못 쓰는 거예요.<br/>
+              AI와 대화하며 당신의 보석을 찾아보세요.
+            </p>
+            <button
+              onClick={() => { audioService.playClick(); changeView('chat'); }}
+              className="w-full bg-white text-indigo-600 py-4 rounded-xl font-bold text-lg shadow-lg hover:bg-indigo-50 transition transform active:scale-95"
+            >
+              내 경험 찾으러 가기
+            </button>
+          </div>
+        )}
+
+        {/* 메인 콘텐츠 영역 */}
+        {view !== 'onboarding' && (
+          <div className="flex-1 flex flex-col p-4 h-full">
+            {view === 'chat' && (
+              <ChatInterface 
+                history={history} 
+                setHistory={setHistory} 
+                onAnalyze={handleAnalyze} 
+              />
+            )}
+            
+            {view === 'analysis' && (
+              <AnalysisView 
+                experiences={experiences} 
+                isLoading={isProcessing} 
+                onNext={handleRecommend}
+                onBack={() => changeView('chat')}
+              />
+            )}
+
+            {view === 'recommendation' && (
+              <RecommendationView 
+                activities={recommendations} 
+                isLoading={isProcessing} 
+                onReset={handleReset}
+                onBack={() => changeView('analysis')}
+              />
+            )}
+          </div>
+        )}
+
+        {/* 하단 진행 상태 표시줄 (심리적 안정감 제공) */}
+        {view !== 'onboarding' && (
+          <div className="bg-white p-4 border-t border-gray-100 flex justify-center space-x-2">
+            <div className={`h-1.5 rounded-full transition-all duration-500 ${view === 'chat' ? 'w-8 bg-indigo-500' : 'w-2 bg-gray-200'}`}></div>
+            <div className={`h-1.5 rounded-full transition-all duration-500 ${view === 'analysis' ? 'w-8 bg-indigo-500' : 'w-2 bg-gray-200'}`}></div>
+            <div className={`h-1.5 rounded-full transition-all duration-500 ${view === 'recommendation' ? 'w-8 bg-indigo-500' : 'w-2 bg-gray-200'}`}></div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+App;
+
+/* --- Bundled from types.ts --- */
+// 채팅 메시지 타입
+export interface Message {
+  id: string;
+  role: 'user' | 'model';
+  text: string;
+  timestamp: Date;
+}
+
+// 발굴된 경험 (STAR 기법)
+export interface Experience {
+  id: string;
+  title: string;
+  situation: string;
+  task: string;
+  action: string;
+  result: string;
+  tags: string[];
+}
+
+// 추천 활동
+export interface Activity {
+  id: string;
+  title: string;
+  type: 'Lecture' | 'Campaign' | 'Volunteering'; // 강의, 캠페인, 봉사
+  duration: string; // 예: "3일 완성"
+  description: string;
+  benefit: string; // 이력서에 쓸 수 있는 포인트
+}
+
+// 화면 상태
+export type ViewState = 'onboarding' | 'chat' | 'analysis' | 'recommendation';
+
+/* --- Bundled from vite.config.ts --- */
+import path from 'path';
+import { defineConfig, loadEnv } from 'vite';
+import react from '@vitejs/plugin-react';
+
+defineConfig(({ mode }) => {
+    const env = loadEnv(mode, '.', '');
+    return {
+      server: {
+        port: 3000,
+        host: '0.0.0.0',
+      },
+      plugins: [react()],
+      define: {
+        'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
+        'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY)
+      },
+      resolve: {
+        alias: {
+          '@': path.resolve(__dirname, '.'),
+        }
+      }
+    };
+});
+
+
+/* --- Bundled from index.tsx --- */
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+
+
+const rootElement = document.getElementById('root');
+if (!rootElement) {
+  throw new Error("Could not find root element to mount to");
+}
+
+const root = ReactDOM.createRoot(rootElement);
+root.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
+
+    </script>
+    <script>
+      window.addEventListener('load', function() {
+        if (window.Babel) {
+          window.Babel.transformScriptTags();
+        }
+      });
+    </script>
+    
+</body>
 </html>

@@ -1,19 +1,10 @@
 <!DOCTYPE html>
 <html lang="ko">
   <head>
-
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script>
-      window.process = {
-        env: {
-          API_KEY: "AIzaSyDr73mB7NaPI0oIL-xG5mcRM3Clv12hTxQ"
-        }
-      };
-    </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>BlindHire - 공정한 채용의 시작</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
       body {
@@ -21,21 +12,760 @@
         background-color: #f8fafc;
       }
     </style>
-  <script type="importmap">
-{
-  "imports": {
-    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.31.0",
-    "react/": "https://aistudiocdn.com/react@^19.2.1/",
-    "react": "https://aistudiocdn.com/react@^19.2.1",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.1/",
-    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0"
-  }
-}
-</script>
+  
 <link rel="stylesheet" href="./index.css">
 </head>
   <body>
     <div id="root"></div>
-  <script type="text/babel" data-type="module" src="./index.tsx" data-presets="react,typescript"></script>
+  
+
+     <!-- Injected by Generator -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script>
+      window.process = { env: { API_KEY: "AIzaSyDr73mB7NaPI0oIL-xG5mcRM3Clv12hTxQ" } };
+    </script>
+    <script type="importmap">
+      {
+        "imports": {
+          "react": "https://esm.sh/react@18.2.0",
+          "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+          "lucide-react": "https://esm.sh/lucide-react@0.263.1",
+          "@google/genai": "https://esm.sh/@google/genai@0.1.1",
+          "recharts": "https://esm.sh/recharts@2.12.0"
+        }
+      }
+    </script>
+    <script type="text/babel" data-type="module" data-presets="react,typescript">
+      
+/* --- Bundled from BlindPreview.tsx --- */
+import React from 'react';
+
+import { ShieldCheck, Building2, GraduationCap, Code } from 'lucide-react';
+
+
+interface BlindPreviewProps {
+  profile: ResumeProfile;
+  onEdit: () => void;
+}
+
+const BlindPreview: React.FC<BlindPreviewProps> = ({ profile, onEdit }) => {
+  return (
+    <div className="max-w-3xl mx-auto">
+      <div className="bg-white rounded-2xl shadow-2xl overflow-hidden transition-all duration-700 animate-fade-in-up">
+        
+        {/* Header - The Blind Area */}
+        <div className="bg-slate-800 p-8 text-white relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-4 opacity-20">
+            <ShieldCheck size={120} />
+          </div>
+          
+          <div className="relative z-10 flex items-center space-x-6">
+            {/* Blurring the Avatar - Visual Feedback of Privacy */}
+            <div className="w-24 h-24 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden border-4 border-slate-600 relative group cursor-not-allowed">
+               <img src="https://picsum.photos/200/200" alt="Blind Profile" className="w-full h-full object-cover filter blur-md grayscale opacity-50 transition-all duration-500 group-hover:blur-lg" />
+               <div className="absolute inset-0 flex items-center justify-center">
+                 <ShieldCheck className="text-white opacity-80" size={32} />
+               </div>
+            </div>
+            
+            <div>
+              {/* Blurring Name and Age */}
+              <div className="flex items-center space-x-2 mb-2">
+                <span className="bg-slate-700 text-transparent bg-clip-text bg-gradient-to-r from-slate-400 to-slate-500 select-none blur-sm px-2 rounded">
+                   {profile.personal.name || "OOO"}
+                </span>
+                <span className="text-xs bg-slate-700 text-slate-400 px-2 py-0.5 rounded-full flex items-center">
+                  <span className="w-2 h-2 bg-green-400 rounded-full mr-1 animate-pulse"></span>
+                  실명/나이 비공개
+                </span>
+              </div>
+              <h1 className="text-3xl font-bold mb-1">{profile.professional.role || "직무 미정"}</h1>
+              <p className="text-slate-400 text-sm">
+                지원자 ID: {Math.random().toString(36).substr(2, 9).toUpperCase()}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Body - The Public Merit Area */}
+        <div className="p-8 space-y-8">
+          
+          {/* Section 1: Summary */}
+          <section className="bg-gray-50 p-6 rounded-xl border-l-4 border-blue-500">
+            <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-3">Professional Summary</h3>
+            <p className="text-gray-800 leading-relaxed text-lg">
+              {profile.professional.summary || "작성된 자기소개가 없습니다."}
+            </p>
+          </section>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Section 2: Experience & Education */}
+            <section>
+              <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4 border-b pb-2">Experience & Education</h3>
+              
+              <div className="space-y-4">
+                <div className="flex items-start">
+                  <div className="bg-blue-100 p-2 rounded-lg mr-4 text-blue-600">
+                    <Building2 size={24} />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-gray-800">{profile.professional.company || "회사명 미입력"}</h4>
+                    <p className="text-gray-500 text-sm">재직 정보 공개</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start">
+                  <div className="bg-purple-100 p-2 rounded-lg mr-4 text-purple-600">
+                    <GraduationCap size={24} />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-gray-800">{profile.professional.education || "학력 미입력"}</h4>
+                    <p className="text-gray-500 text-sm">학력 정보 공개</p>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* Section 3: Skills */}
+            <section>
+              <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4 border-b pb-2">Skills</h3>
+              <div className="flex flex-wrap gap-2">
+                 {profile.professional.skills.length > 0 ? (
+                   profile.professional.skills.map((skill, idx) => (
+                     <span key={idx} className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full font-medium text-sm border border-gray-200 flex items-center">
+                       <Code size={12} className="mr-1 text-gray-400" />
+                       {skill}
+                     </span>
+                   ))
+                 ) : (
+                   <span className="text-gray-400 text-sm">등록된 스킬이 없습니다.</span>
+                 )}
+              </div>
+            </section>
+          </div>
+
+        </div>
+
+        {/* Footer Action */}
+        <div className="p-4 bg-gray-50 border-t flex justify-center">
+          <button 
+            onClick={() => {
+              audioService.playClickSound();
+              onEdit();
+            }}
+            className="text-gray-500 hover:text-gray-800 underline text-sm transition-colors"
+          >
+            이력서 수정하기
+          </button>
+        </div>
+      </div>
+      
+      <div className="mt-8 text-center">
+        <p className="text-gray-500 text-sm">
+          이 화면은 채용 담당자에게 실제로 보여지는 <span className="font-bold text-gray-700">블라인드 뷰</span>입니다.
+        </p>
+      </div>
+    </div>
+  );
+};
+
+BlindPreview;
+
+/* --- Bundled from InfoTooltip.tsx --- */
+import React from 'react';
+import { Info } from 'lucide-react';
+
+interface InfoTooltipProps {
+  text: string;
+}
+
+const InfoTooltip: React.FC<InfoTooltipProps> = ({ text }) => {
+  return (
+    <div className="group relative inline-flex items-center ml-2 cursor-help">
+      <Info size={16} className="text-gray-400 hover:text-blue-500 transition-colors" />
+      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-48 p-2 bg-gray-800 text-white text-xs rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 text-center">
+        {text}
+        <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
+      </div>
+    </div>
+  );
+};
+
+InfoTooltip;
+
+/* --- Bundled from ResumeEditor.tsx --- */
+import React, { useState } from 'react';
+
+import { Sparkles, Save } from 'lucide-react';
+
+
+
+
+interface ResumeEditorProps {
+  profile: ResumeProfile;
+  setProfile: React.Dispatch<React.SetStateAction<ResumeProfile>>;
+  onComplete: () => void;
+}
+
+const ResumeEditor: React.FC<ResumeEditorProps> = ({ profile, setProfile, onComplete }) => {
+  const [isEnhancing, setIsEnhancing] = useState(false);
+
+  const handlePersonalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setProfile(prev => ({
+      ...prev,
+      personal: { ...prev.personal, [e.target.name]: e.target.value }
+    }));
+  };
+
+  const handleProfessionalChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setProfile(prev => ({
+      ...prev,
+      professional: { ...prev.professional, [e.target.name]: e.target.value }
+    }));
+  };
+
+  const handleSkillsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const skills = e.target.value.split(',').map(s => s.trim());
+    setProfile(prev => ({
+      ...prev,
+      professional: { ...prev.professional, skills }
+    }));
+  };
+
+  const handleAIEnhance = async () => {
+    audioService.playClickSound();
+    if (!profile.professional.summary) return;
+    
+    setIsEnhancing(true);
+    const enhanced = await enhanceResumeSummary(profile.professional.summary, profile.professional.role);
+    setProfile(prev => ({
+      ...prev,
+      professional: { ...prev.professional, summary: enhanced }
+    }));
+    setIsEnhancing(false);
+    audioService.playSuccessSound();
+  };
+
+  const handleSubmit = () => {
+    audioService.playSuccessSound();
+    onComplete();
+  };
+
+  return (
+    <div className="max-w-3xl mx-auto p-6 bg-white rounded-2xl shadow-xl transition-all duration-500">
+      <h2 className="text-2xl font-bold mb-6 text-gray-800 border-b pb-2">
+        이력서 작성
+        <span className="text-sm font-normal text-gray-500 ml-4">
+          블라인드 정보와 공개 정보를 구분해 입력하세요.
+        </span>
+      </h2>
+
+      {/* Chunking: Grouping Private Info separately */}
+      <div className="mb-8 p-4 bg-red-50 rounded-xl border border-red-100 relative">
+        <h3 className="text-lg font-semibold text-red-700 mb-4 flex items-center">
+          🔒 비공개 개인정보
+          <InfoTooltip text="이 정보는 기업에게 블라인드 처리되어 보이지 않습니다." />
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">이름</label>
+            <input
+              type="text"
+              name="name"
+              value={profile.personal.name}
+              onChange={handlePersonalChange}
+              className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-200 outline-none transition-all"
+              placeholder="홍길동"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">나이</label>
+            <input
+              type="text"
+              name="age"
+              value={profile.personal.age}
+              onChange={handlePersonalChange}
+              className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-200 outline-none transition-all"
+              placeholder="25세"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">성별</label>
+            <input
+              type="text"
+              name="gender"
+              value={profile.personal.gender}
+              onChange={handlePersonalChange}
+              className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-200 outline-none transition-all"
+              placeholder="남성/여성/무관"
+            />
+          </div>
+        </div>
+        <div className="absolute top-2 right-2 text-xs text-red-400 font-bold bg-white px-2 py-1 rounded-full shadow-sm">
+          BLIND AREA
+        </div>
+      </div>
+
+      {/* Chunking: Grouping Public Info separately */}
+      {/* Isolation Effect: Distinctive color for important section */}
+      <div className="mb-8 p-4 bg-blue-50 rounded-xl border border-blue-100 relative">
+        <h3 className="text-lg font-semibold text-blue-700 mb-4 flex items-center">
+          📢 공개 역량 정보
+          <InfoTooltip text="기업이 평가하는 핵심 정보입니다. 최대한 상세히 적어주세요." />
+        </h3>
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">희망 직무</label>
+              <input
+                type="text"
+                name="role"
+                value={profile.professional.role}
+                onChange={handleProfessionalChange}
+                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-200 outline-none transition-all"
+                placeholder="프론트엔드 개발자"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">학력 (학교명 공개 가능)</label>
+              <input
+                type="text"
+                name="education"
+                value={profile.professional.education}
+                onChange={handleProfessionalChange}
+                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-200 outline-none transition-all"
+                placeholder="한국대학교 컴퓨터공학과"
+              />
+            </div>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">재직 회사 / 경력</label>
+            <input
+              type="text"
+              name="company"
+              value={profile.professional.company}
+              onChange={handleProfessionalChange}
+              className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-200 outline-none transition-all"
+              placeholder="(주)넥스트레벨 (3년)"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">보유 스킬 (쉼표로 구분)</label>
+            <input
+              type="text"
+              value={profile.professional.skills.join(', ')}
+              onChange={handleSkillsChange}
+              className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-200 outline-none transition-all"
+              placeholder="React, TypeScript, Tailwind CSS"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1 flex justify-between">
+              <span>핵심 성과 및 소개</span>
+              <button 
+                onClick={handleAIEnhance}
+                disabled={isEnhancing}
+                className="text-xs flex items-center text-purple-600 hover:text-purple-800 font-bold transition-colors disabled:opacity-50"
+              >
+                <Sparkles size={14} className="mr-1" />
+                {isEnhancing ? "AI 생각 중..." : "AI로 다듬기"}
+              </button>
+            </label>
+            <textarea
+              name="summary"
+              value={profile.professional.summary}
+              onChange={handleProfessionalChange}
+              className="w-full p-3 border border-gray-300 rounded-lg h-32 focus:ring-2 focus:ring-blue-200 outline-none transition-all resize-none"
+              placeholder="본인의 성과를 중심으로 작성해주세요."
+            />
+          </div>
+        </div>
+        <div className="absolute top-2 right-2 text-xs text-blue-500 font-bold bg-white px-2 py-1 rounded-full shadow-sm">
+          PUBLIC AREA
+        </div>
+      </div>
+
+      <div className="flex justify-end">
+        <button
+          onClick={handleSubmit}
+          className="flex items-center px-6 py-3 bg-gray-900 text-white rounded-xl hover:bg-black transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1 active:translate-y-0"
+        >
+          <Save size={18} className="mr-2" />
+          저장하고 프리뷰 보기
+        </button>
+      </div>
+    </div>
+  );
+};
+
+ResumeEditor;
+
+/* --- Bundled from audioService.ts --- */
+// 효과음 관리를 위한 서비스 (Web Audio API 사용)
+
+class AudioService {
+  private audioContext: AudioContext | null = null;
+
+  private getContext(): AudioContext {
+    if (!this.audioContext) {
+      this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    }
+    return this.audioContext;
+  }
+
+  // 짧고 가벼운 클릭음 (Frequency Modulation)
+  public playClickSound() {
+    const ctx = this.getContext();
+    if (ctx.state === 'suspended') {
+      ctx.resume();
+    }
+
+    const oscillator = ctx.createOscillator();
+    const gainNode = ctx.createGain();
+
+    oscillator.type = 'sine';
+    oscillator.frequency.setValueAtTime(400, ctx.currentTime);
+    oscillator.frequency.exponentialRampToValueAtTime(600, ctx.currentTime + 0.1);
+
+    gainNode.gain.setValueAtTime(0.1, ctx.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+
+    oscillator.connect(gainNode);
+    gainNode.connect(ctx.destination);
+
+    oscillator.start();
+    oscillator.stop(ctx.currentTime + 0.1);
+  }
+
+  // 성공/완료 효과음 (Major Chord Arpeggio)
+  public playSuccessSound() {
+    const ctx = this.getContext();
+    if (ctx.state === 'suspended') {
+      ctx.resume();
+    }
+
+    const notes = [523.25, 659.25, 783.99]; // C Major (C5, E5, G5)
+    
+    notes.forEach((freq, index) => {
+      const oscillator = ctx.createOscillator();
+      const gainNode = ctx.createGain();
+      
+      const startTime = ctx.currentTime + (index * 0.1);
+
+      oscillator.type = 'triangle';
+      oscillator.frequency.value = freq;
+
+      gainNode.gain.setValueAtTime(0, startTime);
+      gainNode.gain.linearRampToValueAtTime(0.1, startTime + 0.05);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + 0.4);
+
+      oscillator.connect(gainNode);
+      gainNode.connect(ctx.destination);
+
+      oscillator.start(startTime);
+      oscillator.stop(startTime + 0.5);
+    });
+  }
+
+  // 모드 전환 효과음 (Swipe feel)
+  public playSwitchSound() {
+    const ctx = this.getContext();
+    if (ctx.state === 'suspended') {
+      ctx.resume();
+    }
+    
+    const oscillator = ctx.createOscillator();
+    const gainNode = ctx.createGain();
+    const filter = ctx.createBiquadFilter();
+
+    oscillator.type = 'sawtooth';
+    oscillator.frequency.setValueAtTime(200, ctx.currentTime);
+    oscillator.frequency.linearRampToValueAtTime(100, ctx.currentTime + 0.2);
+
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(1000, ctx.currentTime);
+    filter.frequency.exponentialRampToValueAtTime(100, ctx.currentTime + 0.2);
+
+    gainNode.gain.setValueAtTime(0.1, ctx.currentTime);
+    gainNode.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.2);
+
+    oscillator.connect(filter);
+    filter.connect(gainNode);
+    gainNode.connect(ctx.destination);
+
+    oscillator.start();
+    oscillator.stop(ctx.currentTime + 0.2);
+  }
+}
+
+const audioService = new AudioService();
+
+/* --- Bundled from geminiService.ts --- */
+import { GoogleGenAI } from "@google/genai";
+
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+
+// 이력서 요약을 AI로 다듬어주는 함수
+const enhanceResumeSummary = async (currentSummary: string, role: string): Promise<string> => {
+  try {
+    const model = 'gemini-2.5-flash';
+    const prompt = `
+      당신은 채용 전문가입니다. 아래의 지원자 자기소개(Summary)를 분석하여, 
+      지원자의 이름, 나이, 성별 등 개인 신상 정보는 절대 포함하지 말고, 
+      오직 직무 역량과 성과 중심으로 내용을 3문장 이내로 전문적으로 다듬어주세요.
+      지원 직무: ${role}
+      
+      [원본 내용]
+      ${currentSummary}
+      
+      [수정된 내용]
+    `;
+
+    const response = await ai.models.generateContent({
+      model: model,
+      contents: prompt,
+    });
+
+    return response.text || "AI 응답을 불러올 수 없습니다.";
+  } catch (error) {
+    console.error("Gemini API Error:", error);
+    return "AI 최적화 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.";
+  }
+};
+
+/* --- Bundled from App.tsx --- */
+import React, { useState } from 'react';
+
+
+
+
+
+const initialProfile: ResumeProfile = {
+  personal: {
+    name: '',
+    age: '',
+    gender: '',
+    photoUrl: '',
+  },
+  professional: {
+    education: '',
+    company: '',
+    role: '',
+    skills: [],
+    summary: '',
+  }
+};
+
+const App: React.FC = () => {
+  const [viewMode, setViewMode] = useState<ViewMode>(ViewMode.EDIT);
+  const [profile, setProfile] = useState<ResumeProfile>(initialProfile);
+
+  const switchToPreview = () => {
+    setViewMode(ViewMode.PREVIEW);
+    audioService.playSwitchSound(); // 모드 전환 시 청각적 피드백 제공
+  };
+
+  const switchToEdit = () => {
+    setViewMode(ViewMode.EDIT);
+    audioService.playSwitchSound();
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-50 text-gray-900 font-sans selection:bg-blue-100">
+      
+      {/* Navbar */}
+      <nav className="bg-white border-b border-gray-200 sticky top-0 z-50 bg-opacity-80 backdrop-blur-md">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center text-white font-bold text-xl">B</div>
+            <span className="font-bold text-xl tracking-tight">BlindHire</span>
+          </div>
+          <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
+            <button
+              onClick={switchToEdit}
+              className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${
+                viewMode === ViewMode.EDIT 
+                  ? 'bg-white text-gray-900 shadow-sm' 
+                  : 'text-gray-500 hover:text-gray-900'
+              }`}
+            >
+              작성하기
+            </button>
+            <button
+              onClick={switchToPreview}
+              className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${
+                viewMode === ViewMode.PREVIEW 
+                  ? 'bg-white text-gray-900 shadow-sm' 
+                  : 'text-gray-500 hover:text-gray-900'
+              }`}
+            >
+              미리보기
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      {/* Main Content Area */}
+      <main className="max-w-5xl mx-auto px-4 py-12">
+        {/* 인지 심리학: 사용자에게 현재 상태를 명확히 인지시킴 */}
+        <div className="mb-8 text-center">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            {viewMode === ViewMode.EDIT ? "나의 역량을 증명하세요" : "편견 없는 당신의 모습"}
+          </h1>
+          <p className="text-gray-500">
+            {viewMode === ViewMode.EDIT 
+              ? "개인정보는 블라인드 처리되고, 오직 당신의 실력만 기록됩니다." 
+              : "채용 담당자는 지금 이 화면을 보게 됩니다. 후광 효과 없이 오직 실력으로."}
+          </p>
+        </div>
+
+        {viewMode === ViewMode.EDIT ? (
+          <ResumeEditor 
+            profile={profile} 
+            setProfile={setProfile} 
+            onComplete={switchToPreview} 
+          />
+        ) : (
+          <BlindPreview 
+            profile={profile} 
+            onEdit={switchToEdit} 
+          />
+        )}
+      </main>
+
+      {/* Result Summary for the User Request */}
+      <footer className="max-w-3xl mx-auto mt-20 p-6 bg-white rounded-lg shadow-sm text-sm text-gray-600 border border-gray-100">
+        <h3 className="font-bold text-gray-900 mb-2">#Result 결과 보고서</h3>
+        
+        <div className="space-y-4">
+          <div>
+            <h4 className="font-semibold text-blue-600">1. 구현한 내용 (기능과 UX/UI)</h4>
+            <ol className="list-decimal list-inside space-y-1 mt-1 text-xs">
+              <li><strong>이력서 에디터 (Chunking):</strong> 비공개(Private) 영역과 공개(Public) 영역을 시각적으로 분리하여 정보 입력 시 혼란 방지.</li>
+              <li><strong>블라인드 프리뷰 (Isolation Effect):</strong> 이름/사진을 Blur 처리하고 역량(Skill, 경력)을 강조하여 채용 담당자의 시선을 핵심 정보로 유도.</li>
+              <li><strong>AI 자기소개 최적화 (Gemini):</strong> AI를 활용해 실무 역량 중심의 표현으로 다듬어주며, 실수로 포함된 개인정보 제거.</li>
+              <li><strong>청각 피드백 (Web Audio):</strong> 버튼 클릭 및 모드 전환 시 부드러운 효과음을 제공하여 작업 완료의 성취감 부여.</li>
+            </ol>
+          </div>
+
+          <div>
+            <h4 className="font-semibold text-blue-600">2. 다음에 만드려는 것 3가지 제안</h4>
+            <ol className="list-decimal list-inside space-y-1 mt-1 text-xs">
+              <li><strong>역량 인증 뱃지 시스템:</strong> 깃허브/포트폴리오를 AI가 분석해 '검증된 스킬' 뱃지 부여 (신뢰도 상승).</li>
+              <li><strong>기업용 매칭 대시보드:</strong> 기업이 원하는 스킬 키워드와 매칭되는 익명 인재를 카드 형태로 추천.</li>
+              <li><strong>모의 화상 면접 (AI Avatar):</strong> 본인 얼굴 대신 아바타를 사용하여 목소리와 내용만으로 진행하는 비대면 면접 기능.</li>
+            </ol>
+          </div>
+
+          <div>
+            <h4 className="font-semibold text-blue-600">3. 구현 의도와 인지 심리학적 원리</h4>
+            <ol className="list-decimal list-inside space-y-1 mt-1 text-xs">
+              <li><strong>Chunking (청킹):</strong> 정보를 '개인정보'와 '역량정보' 두 덩어리로 나누어 사용자의 인지 부하(Cognitive Load)를 줄임.</li>
+              <li><strong>Von Restorff Effect (고립 효과):</strong> 프리뷰에서 사진을 흐리게(Blur) 하고 직무명을 굵게 표시해, 중요한 정보(직무)가 더 기억에 남도록 설계.</li>
+              <li><strong>Feedback Loop (피드백):</strong> 저장 시 긍정적인 화음(Major Chord)을 재생하여 사용자의 행동에 대한 즉각적인 보상 제공.</li>
+            </ol>
+          </div>
+
+          <div>
+            <h4 className="font-semibold text-blue-600">4. 코딩 개념 설명</h4>
+            <ol className="list-decimal list-inside space-y-1 mt-1 text-xs">
+              <li><strong>State Lifting (상태 끌어올리기):</strong> 이력서 데이터(`profile`)를 `App.tsx`에서 관리하여 에디터와 프리뷰가 데이터를 공유하도록 함.</li>
+              <li><strong>Web Audio API:</strong> 브라우저에서 소리를 직접 합성하는 기술. MP3 파일 없이 코드로 주파수(Hz)를 조절해 효과음 생성.</li>
+              <li><strong>Tailwind CSS Utility First:</strong> 별도 CSS 파일 없이 클래스 이름만으로 디자인하여 개발 속도를 높이고 일관성 유지.</li>
+            </ol>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+};
+
+App;
+
+/* --- Bundled from types.ts --- */
+// 이력서 데이터 구조 정의
+
+// 1. 개인 정보 (블라인드 처리될 항목)
+export interface PersonalInfo {
+  name: string;
+  age: string;
+  gender: string;
+  photoUrl: string; // 실제 앱에서는 파일 업로드지만 여기선 placeholder 사용
+}
+
+// 2. 전문 정보 (공개될 항목)
+export interface ProfessionalInfo {
+  education: string; // 학력 (학교명 노출 가능)
+  company: string;   // 현/전 직장 (사명 노출 가능)
+  role: string;      // 직무
+  skills: string[];  // 스킬 목록
+  summary: string;   // 핵심 성과 및 자기소개
+}
+
+export interface ResumeProfile {
+  personal: PersonalInfo;
+  professional: ProfessionalInfo;
+}
+
+export enum ViewMode {
+  EDIT = 'EDIT',
+  PREVIEW = 'PREVIEW'
+}
+
+/* --- Bundled from vite.config.ts --- */
+import path from 'path';
+import { defineConfig, loadEnv } from 'vite';
+import react from '@vitejs/plugin-react';
+
+defineConfig(({ mode }) => {
+    const env = loadEnv(mode, '.', '');
+    return {
+      server: {
+        port: 3000,
+        host: '0.0.0.0',
+      },
+      plugins: [react()],
+      define: {
+        'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
+        'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY)
+      },
+      resolve: {
+        alias: {
+          '@': path.resolve(__dirname, '.'),
+        }
+      }
+    };
+});
+
+
+/* --- Bundled from index.tsx --- */
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+
+
+const rootElement = document.getElementById('root');
+if (!rootElement) {
+  throw new Error("Could not find root element to mount to");
+}
+
+const root = ReactDOM.createRoot(rootElement);
+root.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
+
+    </script>
+    <script>
+      window.addEventListener('load', function() {
+        if (window.Babel) {
+          window.Babel.transformScriptTags();
+        }
+      });
+    </script>
+    
 </body>
 </html>
