@@ -16,12 +16,47 @@ const App: React.FC = () => {
   const [inAppWindowUrl, setInAppWindowUrl] = useState<string | null>(null);
 
   const openInAppWindow = (url: string) => {
+    // Find the website ID associated with this URL to set the hash
+    const site = websites.find(w => w.url === url);
+    if (site) {
+      window.location.hash = site.id;
+    }
     setInAppWindowUrl(url);
   };
 
   const closeInAppWindow = () => {
-    setInAppWindowUrl(null);
+    // If we have a hash, going back will trigger the hashchange listener and close the window
+    if (window.location.hash) {
+      window.history.back();
+    } else {
+      setInAppWindowUrl(null);
+    }
   };
+
+  // Hash-based routing: Sync state with URL hash
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.slice(1); // remove #
+      if (hash) {
+        // Find website by ID (decodeURI for Korean characters)
+        const decodedHash = decodeURI(hash);
+        const site = websites.find(w => w.id === decodedHash);
+        if (site) {
+          setInAppWindowUrl(site.url);
+        }
+      } else {
+        setInAppWindowUrl(null);
+      }
+    };
+
+    // Handle initial load
+    if (websites.length > 0) {
+      handleHashChange();
+    }
+
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, [websites]);
 
   // Load generated public sites manifest and merge into websites list
   useEffect(() => {
